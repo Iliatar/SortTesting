@@ -10,6 +10,9 @@ plugins {
     application
 }
 
+group = "org.example"
+version = "0.0.1-SNAPSHOT"
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
@@ -34,7 +37,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.App"
+    mainClass.set("org.example.App")
 }
 
 tasks.named<Test>("test") {
