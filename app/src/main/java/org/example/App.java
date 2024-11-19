@@ -5,17 +5,28 @@ package org.example;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Command;
 
+import java.util.concurrent.locks.AbstractOwnableSynchronizer;
+
+@Command(
+        name = "test",
+        description = "Test sorter unit benchmark"
+)
 public class App implements Runnable {
 
     @Option(names = {"-i", "--iterations"})
-    private int iterationsCount;
+    private Integer iterationsCount = 5000;
 
     @Option(names = {"-l", "--dataLength"})
-    private int dataLength;
+    private Integer dataLength = 8000;
 
     public static void main(String[] args) {
-        CommandLine.run(new App(), args);
+        if (args.length == 0) {
+            new App().run();
+        } else {
+            CommandLine.run(new App(), args);
+        }
     }
 
 
