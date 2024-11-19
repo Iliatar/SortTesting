@@ -15,8 +15,8 @@ public class App {
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
         TestUnit testUnit = new TestUnit();
 
-        testUnit.test(sorterUnit, benchmarkSorter, dataProvider, 10000, 300);
-        testUnit.test(benchmarkSorter, benchmarkSorter, dataProvider, 10000, 300);
-        testUnit.test(benchmarkSorter, sorterUnit, dataProvider, 10000, 300);
+        testUnit.test(sorterUnit, benchmarkSorter, dataProvider, 10000, 500);
+        testUnit.test(benchmarkSorter, benchmarkSorter, dataProvider, 10000, 500);
+        testUnit.test(benchmarkSorter, sorterUnit, dataProvider, 10000, 500);
     }
 }

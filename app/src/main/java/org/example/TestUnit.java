@@ -1,5 +1,6 @@
 package org.example;
 
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.TemporalAmount;
@@ -25,6 +26,18 @@ public class TestUnit {
         Arrays.sort(benchmarkResultsArray);
 
         StringBuilder resultInfoBuilder = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("#.###");
+        double medianUnitResult = (double)(sorterUnitResultsArray[iterationsCount / 2]) / 1000000;
+        double medianBenchmarkResult = (double)(benchmarkResultsArray[iterationsCount / 2]) / 1000000;
+        double topUnitResult = (double)(sorterUnitResultsArray[iterationsCount / 10]) / 1000000;
+        double topBenchmarkResult = (double)(benchmarkResultsArray[iterationsCount / 10]) / 1000000;
+        double bottomUnitResult = (double)(sorterUnitResultsArray[iterationsCount / 10 * 9]) / 1000000;
+        double bottomBenchmarkResult = (double)(benchmarkResultsArray[iterationsCount / 10 * 9]) / 1000000;
+        double benchmarkEfficiency = (medianBenchmarkResult / medianUnitResult) * 0.8
+                + (topBenchmarkResult / topUnitResult) * 0.1
+                + (bottomBenchmarkResult / bottomUnitResult) * 0.1;
+        benchmarkEfficiency *= 1000;
+
         resultInfoBuilder.append("TEST INFO\nSorter unit: ");
         resultInfoBuilder.append(sorterUnit.getClass().getName());
         resultInfoBuilder.append("\nBenchmark unit: ");
@@ -35,12 +48,29 @@ public class TestUnit {
         resultInfoBuilder.append(dataLength);
         resultInfoBuilder.append("\nIterations count: ");
         resultInfoBuilder.append(iterationsCount);
+
         resultInfoBuilder.append("\nMedian result (millis): ");
-        resultInfoBuilder.append(sorterUnitResultsArray[iterationsCount / 2]);
+        resultInfoBuilder.append(df.format(medianUnitResult));
         resultInfoBuilder.append(" (benchmark is ");
-        resultInfoBuilder.append(benchmarkResultsArray[iterationsCount / 2]);
-        resultInfoBuilder.append(")\n");
-        System.out.println(resultInfoBuilder.toString());
+        resultInfoBuilder.append(df.format(medianBenchmarkResult));
+        resultInfoBuilder.append(")");
+
+        resultInfoBuilder.append("\nTop 10% result (millis): ");
+        resultInfoBuilder.append(df.format(topUnitResult));
+        resultInfoBuilder.append(" (benchmark is ");
+        resultInfoBuilder.append(df.format(topBenchmarkResult));
+        resultInfoBuilder.append(")");
+
+        resultInfoBuilder.append("\nBottom 10% result (millis): ");
+        resultInfoBuilder.append(df.format(bottomUnitResult));
+        resultInfoBuilder.append(" (benchmark is ");
+        resultInfoBuilder.append(df.format(bottomBenchmarkResult));
+        resultInfoBuilder.append(")");
+
+        resultInfoBuilder.append("\nBenchmark efficiency is ");
+        resultInfoBuilder.append(df.format(benchmarkEfficiency));
+        resultInfoBuilder.append("\n");
+        System.out.println(resultInfoBuilder);
     }
 
     private <K> long runTest(K[] data, SorterUnit<K> sorterUnit) {
