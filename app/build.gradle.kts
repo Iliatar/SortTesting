@@ -26,6 +26,7 @@ dependencies {
 
     // This dependency is used by the application.
     implementation(libs.guava)
+    implementation("info.picocli:picocli:4.7.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

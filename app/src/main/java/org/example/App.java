@@ -3,20 +3,31 @@
  */
 package org.example;
 
-import java.time.Instant;
-import java.util.List;
+import picocli.CommandLine;
+import picocli.CommandLine.Option;
 
-public class App {
-    public final static int OBJECTS_COUNT = 10000;
+public class App implements Runnable {
+
+    @Option(names = {"-i", "--iterations"})
+    private int iterationsCount;
+
+    @Option(names = {"-l", "--dataLength"})
+    private int dataLength;
 
     public static void main(String[] args) {
+        CommandLine.run(new App(), args);
+    }
+
+
+    @Override
+    public void run() {
         SorterUnit<Integer> sorterUnit = new IntegerQuickSorter();
         DataProvider<Integer> dataProvider = new SimpleIntegerDataProvider();
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
         TestUnit testUnit = new TestUnit();
 
-        testUnit.test(sorterUnit, benchmarkSorter, dataProvider, 10000, 500);
-        testUnit.test(benchmarkSorter, benchmarkSorter, dataProvider, 10000, 500);
-        testUnit.test(benchmarkSorter, sorterUnit, dataProvider, 10000, 500);
+        testUnit.test(sorterUnit, benchmarkSorter, dataProvider, dataLength, iterationsCount);
+        testUnit.test(benchmarkSorter, benchmarkSorter, dataProvider, dataLength, iterationsCount);
+        testUnit.test(benchmarkSorter, sorterUnit, dataProvider, dataLength, iterationsCount);
     }
 }
