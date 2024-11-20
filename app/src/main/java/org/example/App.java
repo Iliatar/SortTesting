@@ -25,13 +25,8 @@ public class App implements Runnable {
     private Integer dataLength = 8000;
 
     public static void main(String[] args) {
-        if (args.length == 0) {
-            new App().run();
-        } else {
-            CommandLine.run(new App(), args);
-        }
-        //int exitCode = new CommandLine(new CheckSum()).execute(args);
-        //System.exit(exitCode);
+        int exitCode = new CommandLine(new App()).execute(args);
+        System.exit(exitCode);
     }
 
     @Override
