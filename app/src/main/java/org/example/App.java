@@ -6,19 +6,22 @@ package org.example;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Command;
-
-import java.util.concurrent.locks.AbstractOwnableSynchronizer;
+import picocli.CommandLine.Parameters;
 
 @Command(
         name = "test",
         description = "Test sorter unit benchmark"
 )
 public class App implements Runnable {
+    @Parameters(index = "0", arity = "1",
+                    description = "Name of class, which will be tested. " +
+                    "Class must have default constructor and implements SorterUnit interface")
+    private String sorterUnitClassName;
 
-    @Option(names = {"-i", "--iterations"})
+    @Option(names = {"-i", "--iterations"}, description = "Test iterations count")
     private Integer iterationsCount = 5000;
 
-    @Option(names = {"-l", "--dataLength"})
+    @Option(names = {"-l", "--dataLength"}, description = "Test data size")
     private Integer dataLength = 8000;
 
     public static void main(String[] args) {
@@ -27,18 +30,29 @@ public class App implements Runnable {
         } else {
             CommandLine.run(new App(), args);
         }
+        //int exitCode = new CommandLine(new CheckSum()).execute(args);
+        //System.exit(exitCode);
     }
-
 
     @Override
     public void run() {
-        SorterUnit<Integer> sorterUnit = new IntegerQuickSorter();
+        SorterUnit<Integer> sorterUnit = null;
+
+        try {
+            sorterUnit = (SorterUnit<Integer>) Class.forName(sorterUnitClassName).getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException e) {
+            System.out.println("Class with name " + sorterUnitClassName + " not found");
+            return;
+        } catch (NoSuchMethodException e) {
+            System.out.println("Class with name " + sorterUnitClassName + " not found don't have default constructor");
+        } catch (Exception e) {
+            System.out.println("Exception happened: " + e.getMessage());
+        }
+
         DataProvider<Integer> dataProvider = new SimpleIntegerDataProvider();
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
         TestUnit testUnit = new TestUnit();
 
         testUnit.test(sorterUnit, benchmarkSorter, dataProvider, dataLength, iterationsCount);
-        testUnit.test(benchmarkSorter, benchmarkSorter, dataProvider, dataLength, iterationsCount);
-        testUnit.test(benchmarkSorter, sorterUnit, dataProvider, dataLength, iterationsCount);
     }
 }
