@@ -15,7 +15,7 @@ import picocli.CommandLine.Parameters;
 public class App implements Runnable {
     @Parameters(index = "0", arity = "1",
                     description = "Name of class, which will be tested. " +
-                    "Class must have default constructor and implements SorterUnit interface")
+                    "Class must have mo args constructor and implements SorterUnit interface")
     private String sorterUnitClassName;
 
     @Option(names = {"-i", "--iterations"}, description = "Test iterations count")
@@ -39,7 +39,7 @@ public class App implements Runnable {
             System.out.println("Class with name " + sorterUnitClassName + " not found");
             return;
         } catch (NoSuchMethodException e) {
-            System.out.println("Class with name " + sorterUnitClassName + " not found don't have default constructor");
+            System.out.println("Class with name " + sorterUnitClassName + " not found don't have no args constructor");
         } catch (Exception e) {
             System.out.println("Exception happened: " + e.getMessage());
         }

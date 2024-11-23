@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class TestUnit {
     public <K> void test(SorterUnit<K> sorterUnit, SorterUnit<K> benchmarkSorter, DataProvider<K> dataProvider, int dataLength, int iterationsCount) {
         if(!validateSorterUnit(sorterUnit, benchmarkSorter, dataProvider, dataLength)) {
-            System.out.println("Tested sorter unit result don't match benchmark unit result!");
+            System.out.println("Tested sorter unit (" + sorterUnit.getClass().getName() + ") result don't match benchmark unit result!");
             return;
         }
 
