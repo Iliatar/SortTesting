@@ -6,20 +6,49 @@ import java.time.Instant;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 
-public class TestUnit {
-    public <K> void test(SorterUnit<K> sorterUnit, SorterUnit<K> benchmarkSorter, DataProvider<K> dataProvider, int dataLength, int iterationsCount) {
-        if(!validateSorterUnit(sorterUnit, benchmarkSorter, dataProvider, dataLength)) {
+public class TestUnit<K> {
+    private static final double MEDIAN_COEFF = 0.5;
+    private static final double TOP_COEFF = 0.1;
+    private static final double BOTTOM_COEFF = 0.9;
+
+    private static final double MEDIAN_WEIGHT = 0.8;
+    private static final double TOP_WEIGHT = 0.1;
+    private static final double BOTTOM_WEIGHT = 0.1;
+
+    private static final double NANOS_TO_MILLIS_COEFF = 1000000;
+
+    private final SorterUnit<K> sorterUnit;
+    private final SorterUnit<K> benchmarkUnit;
+    private final DataProvider<K> dataProvider;
+    private final int dataLength;
+    private final int iterationsCount;
+    private long[] benchmarkResultsArray;
+    private long[] sorterUnitResultsArray;
+
+    public TestUnit(SorterUnit<K> sorterUnit, SorterUnit<K> benchmarkUnit,
+                        DataProvider<K> dataProvider, int dataLength, int iterationsCount) {
+        this.sorterUnit = sorterUnit;
+        this.benchmarkUnit = benchmarkUnit;
+        this.dataProvider = dataProvider;
+        this.dataLength = dataLength;
+        this.iterationsCount = iterationsCount;
+
+
+    }
+
+    public void test() {
+        if(!validateSorterUnit(sorterUnit, benchmarkUnit, dataProvider, dataLength)) {
             System.out.println("Tested sorter unit (" + sorterUnit.getClass().getName() + ") result don't match benchmark unit result!");
             return;
         }
 
-        Long[] benchmarkResultsArray = new Long[iterationsCount];
-        Long[] sorterUnitResultsArray = new Long[iterationsCount];
+        benchmarkResultsArray = new long[iterationsCount];
+        sorterUnitResultsArray = new long[iterationsCount];
 
         for (int iterationNum = 1; iterationNum <= iterationsCount; iterationNum++) {
             K[] data = dataProvider.getData(dataLength);
             sorterUnitResultsArray[iterationNum - 1] = runTest(data, sorterUnit);
-            benchmarkResultsArray[iterationNum - 1] = runTest(data, benchmarkSorter);
+            benchmarkResultsArray[iterationNum - 1] = runTest(data, benchmarkUnit);
         }
 
         Arrays.sort(sorterUnitResultsArray);
@@ -27,21 +56,21 @@ public class TestUnit {
 
         StringBuilder resultInfoBuilder = new StringBuilder();
         DecimalFormat df = new DecimalFormat("#.###");
-        double medianUnitResult = (double)(sorterUnitResultsArray[iterationsCount / 2]) / 1000000;
-        double medianBenchmarkResult = (double)(benchmarkResultsArray[iterationsCount / 2]) / 1000000;
-        double topUnitResult = (double)(sorterUnitResultsArray[iterationsCount / 10]) / 1000000;
-        double topBenchmarkResult = (double)(benchmarkResultsArray[iterationsCount / 10]) / 1000000;
-        double bottomUnitResult = (double)(sorterUnitResultsArray[iterationsCount / 10 * 9]) / 1000000;
-        double bottomBenchmarkResult = (double)(benchmarkResultsArray[iterationsCount / 10 * 9]) / 1000000;
-        double benchmarkEfficiency = (medianBenchmarkResult / medianUnitResult) * 0.8
-                + (topBenchmarkResult / topUnitResult) * 0.1
-                + (bottomBenchmarkResult / bottomUnitResult) * 0.1;
+        double medianUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * MEDIAN_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double medianBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * MEDIAN_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double topUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * TOP_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double topBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * TOP_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double bottomUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * BOTTOM_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double bottomBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * BOTTOM_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double benchmarkEfficiency = (medianBenchmarkResult / medianUnitResult) * MEDIAN_WEIGHT
+                + (topBenchmarkResult / topUnitResult) * TOP_WEIGHT
+                + (bottomBenchmarkResult / bottomUnitResult) * BOTTOM_WEIGHT;
         benchmarkEfficiency *= 1000;
 
         resultInfoBuilder.append("TEST INFO\nSorter unit: ");
         resultInfoBuilder.append(sorterUnit.getClass().getName());
         resultInfoBuilder.append("\nBenchmark unit: ");
-        resultInfoBuilder.append(benchmarkSorter.getClass().getName());
+        resultInfoBuilder.append(benchmarkUnit.getClass().getName());
         resultInfoBuilder.append("\nData Provider Unit: ");
         resultInfoBuilder.append(dataProvider.getClass().getName());
         resultInfoBuilder.append("\nData length: ");
@@ -97,5 +126,33 @@ public class TestUnit {
         }
 
         return true;
+    }
+
+    public SorterUnit<K> getSorterUnit() {
+        return sorterUnit;
+    }
+
+    public SorterUnit<K> getBenchmarkUnit() {
+        return benchmarkUnit;
+    }
+
+    public DataProvider<K> getDataProvider() {
+        return dataProvider;
+    }
+
+    public int getDataLength() {
+        return dataLength;
+    }
+
+    public int getIterationsCount() {
+        return iterationsCount;
+    }
+
+    public long[] getBenchmarkResultsArray() {
+        return benchmarkResultsArray;
+    }
+
+    public long[] getSorterUnitResultsArray() {
+        return sorterUnitResultsArray;
     }
 }

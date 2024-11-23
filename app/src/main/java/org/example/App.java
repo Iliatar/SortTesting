@@ -46,8 +46,8 @@ public class App implements Runnable {
 
         DataProvider<Integer> dataProvider = new SimpleIntegerDataProvider();
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
-        TestUnit testUnit = new TestUnit();
 
-        testUnit.test(sorterUnit, benchmarkSorter, dataProvider, dataLength, iterationsCount);
+        var testUnit = new TestUnit<Integer>(sorterUnit, benchmarkSorter, dataProvider, dataLength, iterationsCount);
+        testUnit.test();
     }
 }
