@@ -7,6 +7,7 @@ import org.example.outputGenerators.BasicOutputGenerator;
 import org.example.outputGenerators.OutputGenerator;
 import org.example.outputUnit.ConsoleOutputUnit;
 import org.example.outputUnit.OutputUnit;
+import org.example.outputUnit.TextFileOutputUnit;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Command;
@@ -27,6 +28,9 @@ public class App implements Runnable {
 
     @Option(names = {"-l", "--dataLength"}, description = "Test data size")
     private Integer dataLength = 8000;
+
+    @Option(names = {"-f", "--fileOutput"}, description = "Output to file flag")
+    private boolean fileOutput;
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new App()).execute(args);
@@ -52,11 +56,14 @@ public class App implements Runnable {
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
         OutputGenerator outputGenerator = new BasicOutputGenerator();
 
-        var testUnit = new TestUnit<Integer>(sorterUnit, benchmarkSorter, outputGenerator,
+        var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter, outputGenerator,
                 dataProvider, dataLength, iterationsCount);
         testUnit.test();
 
-        OutputUnit outputUnit = new ConsoleOutputUnit(new BasicOutputGenerator(), testUnit);
+        OutputGenerator basicOutputGenerator = new BasicOutputGenerator();
+        OutputUnit outputUnit = fileOutput
+                ? new TextFileOutputUnit(basicOutputGenerator, testUnit)
+                : new ConsoleOutputUnit(basicOutputGenerator, testUnit);
         outputUnit.writeOutput();
     }
 }
