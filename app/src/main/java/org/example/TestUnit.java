@@ -52,8 +52,6 @@ public class TestUnit<K> {
 
         Arrays.sort(sorterUnitResultsArray);
         Arrays.sort(benchmarkResultsArray);
-        
-        System.out.println(outputGenerator.generateOutput(this));
     }
 
     private <K> long runTest(K[] data, SorterUnit<K> sorterUnit) {

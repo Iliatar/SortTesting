@@ -5,6 +5,8 @@ package org.example;
 
 import org.example.outputGenerators.BasicOutputGenerator;
 import org.example.outputGenerators.OutputGenerator;
+import org.example.outputUnit.ConsoleOutputUnit;
+import org.example.outputUnit.OutputUnit;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Command;
@@ -53,5 +55,8 @@ public class App implements Runnable {
         var testUnit = new TestUnit<Integer>(sorterUnit, benchmarkSorter, outputGenerator,
                 dataProvider, dataLength, iterationsCount);
         testUnit.test();
+
+        OutputUnit outputUnit = new ConsoleOutputUnit(new BasicOutputGenerator(), testUnit);
+        outputUnit.writeOutput();
     }
 }
