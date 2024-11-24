@@ -10,12 +10,11 @@ public class TestUnit<K> {
     private static final double MEDIAN_COEFF = 0.5;
     private static final double TOP_COEFF = 0.1;
     private static final double BOTTOM_COEFF = 0.9;
-
     private static final double MEDIAN_WEIGHT = 0.8;
     private static final double TOP_WEIGHT = 0.1;
     private static final double BOTTOM_WEIGHT = 0.1;
-
     private static final double NANOS_TO_MILLIS_COEFF = 1000000;
+    private static final int VALIDATOR_ITERATIONS_COUNT = 10;
 
     private final SorterUnit<K> sorterUnit;
     private final SorterUnit<K> benchmarkUnit;
@@ -32,12 +31,13 @@ public class TestUnit<K> {
         this.dataProvider = dataProvider;
         this.dataLength = dataLength;
         this.iterationsCount = iterationsCount;
-
-
     }
 
     public void test() {
-        if(!validateSorterUnit(sorterUnit, benchmarkUnit, dataProvider, dataLength)) {
+        if(SorterValidator.checkSorterUnitsResultEquals(sorterUnit, benchmarkUnit,
+                dataProvider, VALIDATOR_ITERATIONS_COUNT, dataLength)) {
+            System.out.println("Tested sorter unit (" + sorterUnit.getClass().getName() + ") validation complete!");
+        } else {
             System.out.println("Tested sorter unit (" + sorterUnit.getClass().getName() + ") result don't match benchmark unit result!");
             return;
         }
@@ -108,24 +108,6 @@ public class TestUnit<K> {
         sorterUnit.sort(data);
         Instant endTime = Instant.now();
         return Duration.between(startTime, endTime).toNanos();
-    }
-
-    private <K> boolean validateSorterUnit(SorterUnit<K> validatedUnit, SorterUnit<K> benchmarkUnit, DataProvider<K> dataProvider, int dataLength) {
-        K[] data = dataProvider.getData(dataLength);
-        K[] sortedValidatedData = validatedUnit.sort(data.clone());
-        K[] sortedBenchmarkData = benchmarkUnit.sort(data.clone());
-
-        if (sortedBenchmarkData.length != sortedValidatedData.length) {
-            return false;
-        }
-
-        for(int i = 0; i < sortedBenchmarkData.length; i++) {
-            if(sortedBenchmarkData[i] != sortedValidatedData[i]) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public SorterUnit<K> getSorterUnit() {
