@@ -3,6 +3,8 @@
  */
 package org.example;
 
+import org.example.outputGenerators.BasicOutputGenerator;
+import org.example.outputGenerators.OutputGenerator;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Command;
@@ -46,8 +48,10 @@ public class App implements Runnable {
 
         DataProvider<Integer> dataProvider = new SimpleIntegerDataProvider();
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
+        OutputGenerator outputGenerator = new BasicOutputGenerator();
 
-        var testUnit = new TestUnit<Integer>(sorterUnit, benchmarkSorter, dataProvider, dataLength, iterationsCount);
+        var testUnit = new TestUnit<Integer>(sorterUnit, benchmarkSorter, outputGenerator,
+                dataProvider, dataLength, iterationsCount);
         testUnit.test();
     }
 }
