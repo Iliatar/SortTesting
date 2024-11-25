@@ -17,16 +17,15 @@ public class TestUnit<K> {
     private final DataProvider<K> dataProvider;
     private final int dataLength;
     private final int iterationsCount;
-    private final OutputGenerator outputGenerator;
     private long[] benchmarkResultsArray;
     private long[] sorterUnitResultsArray;
+    private boolean completeFlag = false;
 
     public TestUnit(SorterUnit<K> sorterUnit, SorterUnit<K> benchmarkUnit,
-                    OutputGenerator outputGenerator, DataProvider<K> dataProvider,
+                    DataProvider<K> dataProvider,
                     int dataLength, int iterationsCount) {
         this.sorterUnit = sorterUnit;
         this.benchmarkUnit = benchmarkUnit;
-        this.outputGenerator = outputGenerator;
         this.dataProvider = dataProvider;
         this.dataLength = dataLength;
         this.iterationsCount = iterationsCount;
@@ -52,6 +51,9 @@ public class TestUnit<K> {
 
         Arrays.sort(sorterUnitResultsArray);
         Arrays.sort(benchmarkResultsArray);
+
+        completeFlag = true;
+        System.out.println("Tests complete!");
     }
 
     private <K> long runTest(K[] data, SorterUnit<K> sorterUnit) {
@@ -89,4 +91,6 @@ public class TestUnit<K> {
     public long[] getSorterUnitResultsArray() {
         return sorterUnitResultsArray;
     }
+
+    public boolean isComplete() { return completeFlag; }
 }
