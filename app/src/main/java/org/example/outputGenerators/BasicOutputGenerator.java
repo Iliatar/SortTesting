@@ -36,7 +36,7 @@ public class BasicOutputGenerator implements OutputGenerator {
                 + (bottomBenchmarkResult / bottomUnitResult) * BOTTOM_WEIGHT;
         benchmarkEfficiency *= 1000;
 
-        resultInfoBuilder.append("TEST INFO\nSorter unit: ");
+        resultInfoBuilder.append("TEST RESULT INFO\nSorter unit: ");
         resultInfoBuilder.append(sorterUnit.getClass().getName());
         resultInfoBuilder.append("\nBenchmark unit: ");
         resultInfoBuilder.append(benchmarkUnit.getClass().getName());
