@@ -1,4 +1,6 @@
-package org.example;
+package org.example.sorterUnit;
+
+import org.example.sorterUnit.SorterUnit;
 
 import java.util.Arrays;
 

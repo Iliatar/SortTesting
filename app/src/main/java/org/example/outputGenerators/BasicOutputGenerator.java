@@ -1,6 +1,6 @@
 package org.example.outputGenerators;
 
-import org.example.TestUnit;
+import org.example.testUnit.TestUnit;
 
 import java.text.DecimalFormat;
 

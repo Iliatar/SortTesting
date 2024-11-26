@@ -1,6 +1,6 @@
 package org.example.outputUnit;
 
-import org.example.TestUnit;
+import org.example.testUnit.TestUnit;
 import org.example.outputGenerators.OutputGenerator;
 
 public abstract class OutputUnit {

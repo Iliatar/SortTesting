@@ -1,12 +1,12 @@
-package org.example;
+package org.example.testUnit;
 
-import org.example.outputGenerators.BasicOutputGenerator;
-import org.example.outputGenerators.OutputGenerator;
+import org.example.utils.SorterValidator;
+import org.example.dataProvider.DataProvider;
+import org.example.sorterUnit.SorterUnit;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 
 public class TestUnit<K> {
@@ -47,7 +47,7 @@ public class TestUnit<K> {
         sorterUnitResultsArray = new long[iterationsCount];
 
         System.out.print("Progress: 0%");
-        final double iterationProgress = 100 / (double) iterationsCount;
+        final double iterationProgress = 100f / (double) iterationsCount;
         double currentPercentProgress = 0;
         double totalProgress = 0;
         DecimalFormat df = new DecimalFormat("#");

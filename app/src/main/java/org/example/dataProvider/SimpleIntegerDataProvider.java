@@ -1,4 +1,6 @@
-package org.example;
+package org.example.dataProvider;
+
+import org.example.dataProvider.DataProvider;
 
 import java.util.Random;
 

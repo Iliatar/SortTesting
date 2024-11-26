@@ -1,13 +1,12 @@
 package org.example.outputUnit;
 
-import org.example.TestUnit;
+import org.example.testUnit.TestUnit;
 import org.example.outputGenerators.OutputGenerator;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 import java.time.LocalDate;
 
 public class TextFileOutputUnit  extends OutputUnit {

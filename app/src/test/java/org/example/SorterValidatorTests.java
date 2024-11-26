@@ -1,5 +1,10 @@
 package org.example;
 
+import org.example.dataProvider.DataProvider;
+import org.example.dataProvider.SimpleIntegerDataProvider;
+import org.example.sorterUnit.BenchmarkIntegerSorter;
+import org.example.sorterUnit.SorterUnit;
+import org.example.utils.SorterValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -1,10 +1,11 @@
 package org.example;
 
-import org.example.outputGenerators.BasicOutputGenerator;
-import org.example.outputGenerators.OutputGenerator;
-import org.example.outputUnit.ConsoleOutputUnit;
-import org.example.outputUnit.OutputUnit;
-import org.example.outputUnit.TextFileOutputUnit;
+import org.example.dataProvider.DataProvider;
+import org.example.dataProvider.SimpleIntegerDataProvider;
+import org.example.sorterUnit.BenchmarkIntegerSorter;
+import org.example.sorterUnit.IntegerQuickSorter;
+import org.example.sorterUnit.SorterUnit;
+import org.example.testUnit.TestUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

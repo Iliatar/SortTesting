@@ -1,4 +1,7 @@
-package org.example;
+package org.example.utils;
+
+import org.example.dataProvider.DataProvider;
+import org.example.sorterUnit.SorterUnit;
 
 public class SorterValidator {
     public static <K> boolean checkSorterUnitsResultEquals(SorterUnit<K> validatedUnit,

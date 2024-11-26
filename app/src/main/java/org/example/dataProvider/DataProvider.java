@@ -1,4 +1,4 @@
-package org.example;
+package org.example.dataProvider;
 
 public interface DataProvider<K> {
     K[] getData(int dataLength);
