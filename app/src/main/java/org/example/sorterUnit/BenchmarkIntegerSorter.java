@@ -10,4 +10,14 @@ public class BenchmarkIntegerSorter implements SorterUnit<Integer> {
         Arrays.sort(arrayToSort);
         return arrayToSort;
     }
+
+    @Override
+    public String getDescription() {
+        return "Arrays.sort()";
+    }
+
+    @Override
+    public String getVersion() {
+        return "1";
+    }
 }

@@ -42,4 +42,14 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
 
         return result;
     }
+
+    @Override
+    public String getDescription() {
+        return "My quick-sort algorithm";
+    }
+
+    @Override
+    public String getVersion() {
+        return "0.4";
+    }
 }

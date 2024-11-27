@@ -3,6 +3,8 @@ package org.example.outputGenerators;
 import org.example.testUnit.TestUnit;
 
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatterBuilder;
 
 public class BasicOutputGenerator implements OutputGenerator {
     private static final double MEDIAN_COEFF = 0.5;
@@ -36,18 +38,33 @@ public class BasicOutputGenerator implements OutputGenerator {
                 + (bottomBenchmarkResult / bottomUnitResult) * BOTTOM_WEIGHT;
         benchmarkEfficiency *= 1000;
 
-        resultInfoBuilder.append("TEST RESULT INFO\nSorter unit: ");
+        LocalDateTime now = LocalDateTime.now();
+        String timeStamp = now.format(new DateTimeFormatterBuilder().appendPattern("yyyy/MM/dd kk:mm:ss").toFormatter());
+
+        resultInfoBuilder.append("\n------------------TEST RESULT INFO------------------\n\n");
+        resultInfoBuilder.append(timeStamp);
+        resultInfoBuilder.append("\n\nSorter unit: ");
         resultInfoBuilder.append(sorterUnit.getClass().getName());
-        resultInfoBuilder.append("\nBenchmark unit: ");
+        resultInfoBuilder.append("\nDescription: ");
+        resultInfoBuilder.append(sorterUnit.getDescription());
+        resultInfoBuilder.append("\nVersion: ");
+        resultInfoBuilder.append(sorterUnit.getVersion());
+
+        resultInfoBuilder.append("\n\nBenchmark unit: ");
         resultInfoBuilder.append(benchmarkUnit.getClass().getName());
-        resultInfoBuilder.append("\nData Provider Unit: ");
+        resultInfoBuilder.append("\nDescription: ");
+        resultInfoBuilder.append(benchmarkUnit.getDescription());
+        resultInfoBuilder.append("\nVersion: ");
+        resultInfoBuilder.append(benchmarkUnit.getVersion());
+
+        resultInfoBuilder.append("\n\nData Provider Unit: ");
         resultInfoBuilder.append(dataProvider.getClass().getName());
         resultInfoBuilder.append("\nData length: ");
         resultInfoBuilder.append(dataLength);
         resultInfoBuilder.append("\nIterations count: ");
         resultInfoBuilder.append(iterationsCount);
 
-        resultInfoBuilder.append("\nMedian result (millis): ");
+        resultInfoBuilder.append("\n\nMedian result (millis): ");
         resultInfoBuilder.append(df.format(medianUnitResult));
         resultInfoBuilder.append(" (benchmark is ");
         resultInfoBuilder.append(df.format(medianBenchmarkResult));
@@ -65,9 +82,9 @@ public class BasicOutputGenerator implements OutputGenerator {
         resultInfoBuilder.append(df.format(bottomBenchmarkResult));
         resultInfoBuilder.append(")");
 
-        resultInfoBuilder.append("\nBenchmark efficiency is ");
+        resultInfoBuilder.append("\n\nBenchmark efficiency is ");
         resultInfoBuilder.append(df.format(benchmarkEfficiency));
-        resultInfoBuilder.append("\n");
+        resultInfoBuilder.append("\n----------------------------------------------------");
 
         return resultInfoBuilder.toString();
     }
