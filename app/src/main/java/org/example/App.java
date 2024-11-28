@@ -29,17 +29,21 @@ public class App implements Runnable {
                     "Class must have no args constructor and implements SorterUnit interface")
     private String sorterUnitClassName;
 
-    @Option(names = {"-i", "--iterations"}, description = "Test iterations count")
-    private Integer iterationsCount = 5000;
+    @Option(names = {"-i", "--iterations"}, description = "Test iterations count",
+            defaultValue = "5000", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    private Integer iterationsCount;
 
-    @Option(names = {"-l", "--dataLength"}, description = "Test data size")
-    private Integer dataLength = 8000;
+    @Option(names = {"-l", "--dataLength"}, description = "Test data size",
+            defaultValue = "8000", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
+    private Integer dataLength;
 
     @Option(names = {"-f", "--fileOutput"}, description = "Output to file flag")
     private boolean fileOutput;
 
     @Option(names = {"-d", "--dataProvider"}, description = "Name of class, which will be used as data provider. " +
-            "Class must have no args constructor and implements DataProvider interface")
+            "Class must have no args constructor and implements DataProvider interface",
+            defaultValue = "org.example.dataProvider.SimpleIntegerDataProvider",
+            showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
     private String dataProviderClassName = "org.example.dataProvider.SimpleIntegerDataProvider";
 
     public static void main(String[] args) {
