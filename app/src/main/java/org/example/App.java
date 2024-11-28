@@ -4,6 +4,7 @@
 package org.example;
 
 import org.example.dataProvider.DataProvider;
+import org.example.dataProvider.FragmentedIntegerDataProvider;
 import org.example.dataProvider.SimpleIntegerDataProvider;
 import org.example.outputGenerators.BasicOutputGenerator;
 import org.example.outputGenerators.OutputGenerator;
@@ -25,7 +26,7 @@ import picocli.CommandLine.Parameters;
 public class App implements Runnable {
     @Parameters(index = "0", arity = "1",
                     description = "Name of class, which will be tested. " +
-                    "Class must have mo args constructor and implements SorterUnit interface")
+                    "Class must have no args constructor and implements SorterUnit interface")
     private String sorterUnitClassName;
 
     @Option(names = {"-i", "--iterations"}, description = "Test iterations count")
@@ -37,6 +38,10 @@ public class App implements Runnable {
     @Option(names = {"-f", "--fileOutput"}, description = "Output to file flag")
     private boolean fileOutput;
 
+    @Option(names = {"-d", "--dataProvider"}, description = "Name of class, which will be used as data provider. " +
+            "Class must have no args constructor and implements DataProvider interface")
+    private String dataProviderClassName = "org.example.dataProvider.SimpleIntegerDataProvider";
+
     public static void main(String[] args) {
         int exitCode = new CommandLine(new App()).execute(args);
         System.exit(exitCode);
@@ -47,7 +52,8 @@ public class App implements Runnable {
         SorterUnit<Integer> sorterUnit = null;
 
         try {
-            sorterUnit = (SorterUnit<Integer>) Class.forName(sorterUnitClassName).getDeclaredConstructor().newInstance();
+            sorterUnit = (SorterUnit<Integer>) Class.forName(sorterUnitClassName)
+                    .getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException e) {
             System.out.println("Class with name " + sorterUnitClassName + " not found");
             return;
@@ -57,12 +63,27 @@ public class App implements Runnable {
             System.out.println("Exception happened: " + e.getMessage());
         }
 
-        DataProvider<Integer> dataProvider = new SimpleIntegerDataProvider();
+        DataProvider<Integer> dataProvider = new FragmentedIntegerDataProvider();
+
+        try {
+            dataProvider = (DataProvider<Integer>) Class.forName(dataProviderClassName)
+                    .getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException e) {
+            System.out.println("Class with name " + sorterUnitClassName + " not found");
+            return;
+        } catch (NoSuchMethodException e) {
+            System.out.println("Class with name " + sorterUnitClassName + " not found don't have no args constructor");
+        } catch (Exception e) {
+            System.out.println("Exception happened: " + e.getMessage());
+        }
+
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
 
         var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter,
                 dataProvider, dataLength, iterationsCount);
         testUnit.test();
+
+        if (!testUnit.isComplete()) return;
 
         OutputGenerator basicOutputGenerator = new BasicOutputGenerator();
         OutputUnit outputUnit = fileOutput

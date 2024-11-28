@@ -29,6 +29,16 @@ public class SorterValidatorTests {
             public Integer[] sort(Integer[] arrayToSort) {
                 return arrayToSort;
             }
+
+            @Override
+            public String getDescription() {
+                return "Anonymous corrupted sorter unit";
+            }
+
+            @Override
+            public String getVersion() {
+                return "1.0";
+            }
         };
 
         DataProvider<Integer> dataProvider = new SimpleIntegerDataProvider();

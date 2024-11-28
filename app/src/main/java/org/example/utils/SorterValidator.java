@@ -19,7 +19,7 @@ public class SorterValidator {
             }
 
             for (int j = 0; j < sortedBenchmarkData.length; j++) {
-                if (sortedBenchmarkData[j] != sortedValidatedData[j]) {
+                if (!sortedBenchmarkData[j].equals(sortedValidatedData[j])) {
                     return false;
                 }
             }
