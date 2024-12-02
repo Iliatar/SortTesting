@@ -5,7 +5,6 @@ package org.example;
 
 import org.example.dataProvider.DataProvider;
 import org.example.dataProvider.FragmentedIntegerDataProvider;
-import org.example.dataProvider.SimpleIntegerDataProvider;
 import org.example.outputGenerators.BasicOutputGenerator;
 import org.example.outputGenerators.OutputGenerator;
 import org.example.outputUnit.ConsoleOutputUnit;
@@ -14,6 +13,7 @@ import org.example.outputUnit.TextFileOutputUnit;
 import org.example.sorterUnit.BenchmarkIntegerSorter;
 import org.example.sorterUnit.SorterUnit;
 import org.example.testUnit.TestUnit;
+import org.example.utils.SorterClassLoader;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Command;
@@ -25,9 +25,13 @@ import picocli.CommandLine.Parameters;
 )
 public class App implements Runnable {
     @Parameters(index = "0", arity = "1",
-                    description = "Name of class, which will be tested. " +
+                    description = "Full name of class, which will be tested. " +
                     "Class must have no args constructor and implements SorterUnit interface")
     private String sorterUnitClassName;
+
+    @Parameters(index = "1", arity = "1",
+                description = "File path if class, which will be tested (i.e. '../testedSorter.class').")
+    private String sorterUnitFilePath;
 
     @Option(names = {"-i", "--iterations"}, description = "Test iterations count",
             defaultValue = "5000", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
@@ -54,31 +58,27 @@ public class App implements Runnable {
     @Override
     public void run() {
         SorterUnit<Integer> sorterUnit = null;
+        DataProvider<Integer> dataProvider = null;
 
         try {
-            sorterUnit = (SorterUnit<Integer>) Class.forName(sorterUnitClassName)
-                    .getDeclaredConstructor().newInstance();
-        } catch (ClassNotFoundException e) {
-            System.out.println("Class with name " + sorterUnitClassName + " not found");
-            return;
+            SorterClassLoader sorterClassLoader = new SorterClassLoader();
+            Class<?> sorterUnitClass = sorterClassLoader.findClass(sorterUnitClassName, sorterUnitFilePath);
+            sorterUnit = (SorterUnit<Integer>) sorterUnitClass.getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException e) {
-            System.out.println("Class with name " + sorterUnitClassName + " not found don't have no args constructor");
+            throw new RuntimeException("Class with name " + sorterUnitClassName + " not found don't have no args constructor");
         } catch (Exception e) {
-            System.out.println("Exception happened: " + e.getMessage());
+            throw new RuntimeException("Exception happened: " + e.getMessage());
         }
-
-        DataProvider<Integer> dataProvider = new FragmentedIntegerDataProvider();
 
         try {
             dataProvider = (DataProvider<Integer>) Class.forName(dataProviderClassName)
                     .getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException e) {
-            System.out.println("Class with name " + sorterUnitClassName + " not found");
-            return;
+            throw new RuntimeException("Class with name " + dataProviderClassName + " not found");
         } catch (NoSuchMethodException e) {
-            System.out.println("Class with name " + sorterUnitClassName + " not found don't have no args constructor");
+            throw new RuntimeException("Class with name " + dataProviderClassName + " don't have no args constructor");
         } catch (Exception e) {
-            System.out.println("Exception happened: " + e.getMessage());
+            throw new RuntimeException("Exception happened: " + e.getMessage());
         }
 
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
