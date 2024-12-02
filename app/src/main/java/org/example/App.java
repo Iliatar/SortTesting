@@ -67,6 +67,9 @@ public class App implements Runnable {
         } catch (NoSuchMethodException e) {
             System.out.println("Class with name " + sorterUnitClassName + " don't have no args constructor!");
             return;
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            return;
         } catch (Exception e) {
             System.out.println("Exception happened: " + e.getMessage());
             return;
