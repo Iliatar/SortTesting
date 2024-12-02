@@ -65,20 +65,25 @@ public class App implements Runnable {
             Class<?> sorterUnitClass = sorterClassLoader.findClass(sorterUnitClassName, sorterUnitFilePath);
             sorterUnit = (SorterUnit<Integer>) sorterUnitClass.getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Class with name " + sorterUnitClassName + " not found don't have no args constructor");
+            System.out.println("Class with name " + sorterUnitClassName + " don't have no args constructor!");
+            return;
         } catch (Exception e) {
-            throw new RuntimeException("Exception happened: " + e.getMessage());
+            System.out.println("Exception happened: " + e.getMessage());
+            return;
         }
 
         try {
             dataProvider = (DataProvider<Integer>) Class.forName(dataProviderClassName)
                     .getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Class with name " + dataProviderClassName + " not found");
+            System.out.println("Class with name " + dataProviderClassName + " not found");
+            return;
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Class with name " + dataProviderClassName + " don't have no args constructor");
+            System.out.println("Class with name " + dataProviderClassName + " don't have no args constructor");
+            return;
         } catch (Exception e) {
-            throw new RuntimeException("Exception happened: " + e.getMessage());
+            System.out.println("Exception happened: " + e.getMessage());
+            return;
         }
 
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
