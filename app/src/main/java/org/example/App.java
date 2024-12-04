@@ -5,6 +5,7 @@ package org.example;
 
 import org.example.dataProvider.DataProvider;
 import org.example.dataProvider.FragmentedIntegerDataProvider;
+import org.example.dataProvider.SimpleIntegerDataProvider;
 import org.example.outputGenerators.BasicOutputGenerator;
 import org.example.outputGenerators.OutputGenerator;
 import org.example.outputUnit.ConsoleOutputUnit;
@@ -46,6 +47,9 @@ public class App implements Runnable {
     @Option(names = {"-f", "--fileOutput"}, description = "Output to file flag")
     private boolean fileOutput;
 
+    @Option(names = {"-c", "--complex"}, description = "Complex benchmark flag. Overrides -l, -d and -i options")
+    private boolean complex;
+
     @Option(names = {"-d", "--dataProvider"}, description = "Name of class, which will be used as data provider. " +
             "Class must have no args constructor and implements DataProvider interface",
             defaultValue = "org.example.dataProvider.SimpleIntegerDataProvider",
@@ -62,6 +66,7 @@ public class App implements Runnable {
         SorterUnit<Integer> sorterUnit = null;
         DataProvider<Integer> dataProvider = null;
 
+        //TODO выделить в отдельный метод
         try {
             SorterClassLoader sorterClassLoader = new SorterClassLoader();
             Class<?> sorterUnitClass = sorterClassLoader.findClass(sorterUnitClassName, sorterUnitFilePath);
@@ -77,24 +82,34 @@ public class App implements Runnable {
             return;
         }
 
-        try {
-            dataProvider = (DataProvider<Integer>) Class.forName(dataProviderClassName)
-                    .getDeclaredConstructor().newInstance();
-        } catch (ClassNotFoundException e) {
-            System.out.println("Class with name " + dataProviderClassName + " not found");
-            return;
-        } catch (NoSuchMethodException e) {
-            System.out.println("Class with name " + dataProviderClassName + " don't have no args constructor");
-            return;
-        } catch (Exception e) {
-            System.out.println("Exception happened: " + e.getMessage());
-            return;
-        }
-
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
 
         var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter);
-        testUnit.addTestItem(new TestItem<>(dataProvider, dataLength, iterationsCount));
+        if(complex) {
+            testUnit.addTestItem(new TestItem<>(new SimpleIntegerDataProvider(), 100, 1000));
+            testUnit.addTestItem(new TestItem<>(new SimpleIntegerDataProvider(), 1000, 3000));
+            testUnit.addTestItem(new TestItem<>(new SimpleIntegerDataProvider(), 5000, 2000));
+            testUnit.addTestItem(new TestItem<>(new FragmentedIntegerDataProvider(), 100, 1000));
+            testUnit.addTestItem(new TestItem<>(new FragmentedIntegerDataProvider(), 1000, 3000));
+            testUnit.addTestItem(new TestItem<>(new FragmentedIntegerDataProvider(), 5000, 2000));
+        } else {
+            //TODO выделить в отдельный метод
+            try {
+                dataProvider = (DataProvider<Integer>) Class.forName(dataProviderClassName)
+                        .getDeclaredConstructor().newInstance();
+            } catch (ClassNotFoundException e) {
+                System.out.println("Class with name " + dataProviderClassName + " not found");
+                return;
+            } catch (NoSuchMethodException e) {
+                System.out.println("Class with name " + dataProviderClassName + " don't have no args constructor");
+                return;
+            } catch (Exception e) {
+                System.out.println("Exception happened: " + e.getMessage());
+                return;
+            }
+            testUnit.addTestItem(new TestItem<>(dataProvider, dataLength, iterationsCount));
+        }
+
         try {
             testUnit.runTest();
         } catch (SorterUnitValidationFailedException e) {
