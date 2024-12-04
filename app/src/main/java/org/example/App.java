@@ -12,6 +12,7 @@ import org.example.outputUnit.OutputUnit;
 import org.example.outputUnit.TextFileOutputUnit;
 import org.example.sorterUnit.BenchmarkIntegerSorter;
 import org.example.sorterUnit.SorterUnit;
+import org.example.testUnit.SorterUnitValidationFailedException;
 import org.example.testUnit.TestItem;
 import org.example.testUnit.TestUnit;
 import org.example.utils.SorterClassLoader;
@@ -94,7 +95,12 @@ public class App implements Runnable {
 
         var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter);
         testUnit.addTestItem(new TestItem<>(dataProvider, dataLength, iterationsCount));
-        testUnit.runTest();
+        try {
+            testUnit.runTest();
+        } catch (SorterUnitValidationFailedException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
         if (!testUnit.isComplete()) return;
 

@@ -34,12 +34,14 @@ public class TestUnit<K> {
         testItemsList.add(testItem);
     }
 
-    public void runTest() {
+    public void runTest() throws SorterUnitValidationFailedException {
         int totalIterations = testItemsList.stream()
                 .map(item -> item.getIterationsCount())
                 .reduce(0, (x,y) -> x + y);
 
         iterationProgress = 100f / (double) totalIterations;
+
+        System.out.print("Progress: 0%");
 
         for(TestItem item : testItemsList) {
             processTestItem(item);
@@ -49,7 +51,7 @@ public class TestUnit<K> {
         System.out.println("\nTests complete!");
     }
 
-    public void processTestItem(TestItem<K> testItem) {
+    public void processTestItem(TestItem<K> testItem) throws SorterUnitValidationFailedException {
 
         testItem.initialize();
 
@@ -57,18 +59,13 @@ public class TestUnit<K> {
         var dataLength = testItem.getDataLength();
         var iterationsCount = testItem.getIterationsCount();
 
-        if(SorterValidator.checkSorterUnitsResultEquals(sorterUnit, benchmarkUnit,
+        if(!SorterValidator.checkSorterUnitsResultEquals(sorterUnit, benchmarkUnit,
                 dataProvider, VALIDATOR_ITERATIONS_COUNT, dataLength)) {
-            System.out.println("Tested sorter unit (" + sorterUnit.getClass().getName() + ") validation complete!");
-        } else {
-            System.out.println("Tested sorter unit (" + sorterUnit.getClass().getName()
+            throw new SorterUnitValidationFailedException("Tested sorter unit (" + sorterUnit.getClass().getName()
                     + ") validation failed! Result don't match benchmark unit result!");
-            return;
         }
 
-        System.out.print("Progress: 0%");
         DecimalFormat df = new DecimalFormat("#");
-
 
         for (int iterationNum = 0; iterationNum < iterationsCount; iterationNum++) {
             K[] data = dataProvider.getData(dataLength);
