@@ -12,6 +12,7 @@ import org.example.outputUnit.OutputUnit;
 import org.example.outputUnit.TextFileOutputUnit;
 import org.example.sorterUnit.BenchmarkIntegerSorter;
 import org.example.sorterUnit.SorterUnit;
+import org.example.testUnit.TestItem;
 import org.example.testUnit.TestUnit;
 import org.example.utils.SorterClassLoader;
 import picocli.CommandLine;
@@ -91,9 +92,9 @@ public class App implements Runnable {
 
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
 
-        var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter,
-                dataProvider, dataLength, iterationsCount);
-        testUnit.test();
+        var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter);
+        testUnit.addTestItem(new TestItem<>(dataProvider, dataLength, iterationsCount));
+        testUnit.runTest();
 
         if (!testUnit.isComplete()) return;
 

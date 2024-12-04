@@ -1,5 +1,6 @@
 package org.example.outputGenerators;
 
+import org.example.testUnit.TestItem;
 import org.example.testUnit.TestUnit;
 
 import java.text.DecimalFormat;
@@ -14,30 +15,17 @@ public class BasicOutputGenerator implements OutputGenerator {
     private static final double TOP_WEIGHT = 0.1;
     private static final double BOTTOM_WEIGHT = 0.1;
     private static final double NANOS_TO_MILLIS_COEFF = 1000000;
+    private final DecimalFormat df = new DecimalFormat("#.###");
 
     @Override
-    public String generateOutput(TestUnit testUnit) {
-        var sorterUnit = testUnit.getSorterUnit();
-        var benchmarkUnit = testUnit.getBenchmarkUnit();
-        var dataProvider = testUnit.getDataProvider();
-        var dataLength = testUnit.getDataLength();
-        var sorterUnitResultsArray = testUnit.getSorterUnitResultsArray();
-        var benchmarkResultsArray = testUnit.getBenchmarkResultsArray();
-        var iterationsCount = testUnit.getIterationsCount();
+    public <K> String generateOutput(TestUnit<K> testUnit) {
+        double benchmarkEfficiency = 0;
+        int totalIterations = 0;
 
         StringBuilder resultInfoBuilder = new StringBuilder();
-        DecimalFormat df = new DecimalFormat("#.###");
-        double medianUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * MEDIAN_COEFF)]) / NANOS_TO_MILLIS_COEFF;
-        double medianBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * MEDIAN_COEFF)]) / NANOS_TO_MILLIS_COEFF;
-        double topUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * TOP_COEFF)]) / NANOS_TO_MILLIS_COEFF;
-        double topBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * TOP_COEFF)]) / NANOS_TO_MILLIS_COEFF;
-        double bottomUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * BOTTOM_COEFF)]) / NANOS_TO_MILLIS_COEFF;
-        double bottomBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * BOTTOM_COEFF)]) / NANOS_TO_MILLIS_COEFF;
-        double benchmarkEfficiency = (medianBenchmarkResult / medianUnitResult) * MEDIAN_WEIGHT
-                + (topBenchmarkResult / topUnitResult) * TOP_WEIGHT
-                + (bottomBenchmarkResult / bottomUnitResult) * BOTTOM_WEIGHT;
-        benchmarkEfficiency *= 1000;
 
+        var sorterUnit = testUnit.getSorterUnit();
+        var benchmarkUnit = testUnit.getBenchmarkUnit();
         LocalDateTime now = LocalDateTime.now();
         String timeStamp = now.format(new DateTimeFormatterBuilder().appendPattern("yyyy/MM/dd kk:mm:ss").toFormatter());
 
@@ -56,6 +44,36 @@ public class BasicOutputGenerator implements OutputGenerator {
         resultInfoBuilder.append(benchmarkUnit.getDescription());
         resultInfoBuilder.append("\nVersion: ");
         resultInfoBuilder.append(benchmarkUnit.getVersion());
+
+        for(TestItem<K> testItem : testUnit.getTestItemsList()) {
+            benchmarkEfficiency += generateItemOutput(testItem, resultInfoBuilder) * testItem.getIterationsCount();
+            totalIterations += testItem.getIterationsCount();
+        }
+
+        resultInfoBuilder.append("\n\nTotal benchmark result is: " + df.format(benchmarkEfficiency / totalIterations));
+
+        return resultInfoBuilder.toString();
+    }
+
+    private double generateItemOutput(TestItem testItem, StringBuilder resultInfoBuilder) {
+
+        var dataProvider = testItem.getDataProvider();
+        var dataLength = testItem.getDataLength();
+        var sorterUnitResultsArray = testItem.getSorterUnitResultsArray();
+        var benchmarkResultsArray = testItem.getBenchmarkResultsArray();
+        var iterationsCount = testItem.getIterationsCount();
+
+
+        double medianUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * MEDIAN_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double medianBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * MEDIAN_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double topUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * TOP_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double topBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * TOP_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double bottomUnitResult = (double)(sorterUnitResultsArray[(int)(iterationsCount * BOTTOM_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double bottomBenchmarkResult = (double)(benchmarkResultsArray[(int)(iterationsCount * BOTTOM_COEFF)]) / NANOS_TO_MILLIS_COEFF;
+        double benchmarkEfficiency = (medianBenchmarkResult / medianUnitResult) * MEDIAN_WEIGHT
+                + (topBenchmarkResult / topUnitResult) * TOP_WEIGHT
+                + (bottomBenchmarkResult / bottomUnitResult) * BOTTOM_WEIGHT;
+        benchmarkEfficiency *= 1000;
 
         resultInfoBuilder.append("\n\nData Provider Unit: ");
         resultInfoBuilder.append(dataProvider.getClass().getName());
@@ -86,6 +104,6 @@ public class BasicOutputGenerator implements OutputGenerator {
         resultInfoBuilder.append(df.format(benchmarkEfficiency));
         resultInfoBuilder.append("\n----------------------------------------------------");
 
-        return resultInfoBuilder.toString();
+        return benchmarkEfficiency;
     }
 }

@@ -7,7 +7,9 @@ import org.example.sorterUnit.SorterUnit;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class TestUnit<K> {
     private static final int VALIDATOR_ITERATIONS_COUNT = 10;
@@ -16,24 +18,45 @@ public class TestUnit<K> {
 
     private final SorterUnit<K> sorterUnit;
     private final SorterUnit<K> benchmarkUnit;
-    private final DataProvider<K> dataProvider;
-    private final int dataLength;
-    private final int iterationsCount;
-    private long[] benchmarkResultsArray;
-    private long[] sorterUnitResultsArray;
+    private final List<TestItem<K>> testItemsList;
+    private double iterationProgress;
+    private double currentPercentProgress = 0;
+    private double totalProgress = 0;
     private boolean completeFlag = false;
 
-    public TestUnit(SorterUnit<K> sorterUnit, SorterUnit<K> benchmarkUnit,
-                    DataProvider<K> dataProvider,
-                    int dataLength, int iterationsCount) {
+    public TestUnit(SorterUnit<K> sorterUnit, SorterUnit<K> benchmarkUnit) {
         this.sorterUnit = sorterUnit;
         this.benchmarkUnit = benchmarkUnit;
-        this.dataProvider = dataProvider;
-        this.dataLength = dataLength;
-        this.iterationsCount = iterationsCount;
+        testItemsList = new ArrayList<>();
     }
 
-    public void test() {
+    public void addTestItem(TestItem<K> testItem) {
+        testItemsList.add(testItem);
+    }
+
+    public void runTest() {
+        int totalIterations = testItemsList.stream()
+                .map(item -> item.getIterationsCount())
+                .reduce(0, (x,y) -> x + y);
+
+        iterationProgress = 100f / (double) totalIterations;
+
+        for(TestItem item : testItemsList) {
+            processTestItem(item);
+        }
+
+        completeFlag = true;
+        System.out.println("\nTests complete!");
+    }
+
+    public void processTestItem(TestItem<K> testItem) {
+
+        testItem.initialize();
+
+        var dataProvider = testItem.getDataProvider();
+        var dataLength = testItem.getDataLength();
+        var iterationsCount = testItem.getIterationsCount();
+
         if(SorterValidator.checkSorterUnitsResultEquals(sorterUnit, benchmarkUnit,
                 dataProvider, VALIDATOR_ITERATIONS_COUNT, dataLength)) {
             System.out.println("Tested sorter unit (" + sorterUnit.getClass().getName() + ") validation complete!");
@@ -43,20 +66,14 @@ public class TestUnit<K> {
             return;
         }
 
-        benchmarkResultsArray = new long[iterationsCount];
-        sorterUnitResultsArray = new long[iterationsCount];
-
         System.out.print("Progress: 0%");
-        final double iterationProgress = 100f / (double) iterationsCount;
-        double currentPercentProgress = 0;
-        double totalProgress = 0;
         DecimalFormat df = new DecimalFormat("#");
 
 
-        for (int iterationNum = 1; iterationNum <= iterationsCount; iterationNum++) {
+        for (int iterationNum = 0; iterationNum < iterationsCount; iterationNum++) {
             K[] data = dataProvider.getData(dataLength);
-            sorterUnitResultsArray[iterationNum - 1] = runTest(data, sorterUnit);
-            benchmarkResultsArray[iterationNum - 1] = runTest(data, benchmarkUnit);
+            testItem.setSorterUnitResult(iterationNum, runTest(data, sorterUnit));
+            testItem.setBenchmarkResult(iterationNum, runTest(data, benchmarkUnit));
 
             currentPercentProgress += iterationProgress;
 
@@ -71,11 +88,7 @@ public class TestUnit<K> {
             }
         }
 
-        Arrays.sort(sorterUnitResultsArray);
-        Arrays.sort(benchmarkResultsArray);
-
-        completeFlag = true;
-        System.out.println("\nTests complete!");
+        testItem.close();
     }
 
     private <K> long runTest(K[] data, SorterUnit<K> sorterUnit) {
@@ -94,25 +107,7 @@ public class TestUnit<K> {
         return benchmarkUnit;
     }
 
-    public DataProvider<K> getDataProvider() {
-        return dataProvider;
-    }
-
-    public int getDataLength() {
-        return dataLength;
-    }
-
-    public int getIterationsCount() {
-        return iterationsCount;
-    }
-
-    public long[] getBenchmarkResultsArray() {
-        return benchmarkResultsArray;
-    }
-
-    public long[] getSorterUnitResultsArray() {
-        return sorterUnitResultsArray;
-    }
+    public List<TestItem<K>> getTestItemsList() { return testItemsList; }
 
     public boolean isComplete() { return completeFlag; }
 }
