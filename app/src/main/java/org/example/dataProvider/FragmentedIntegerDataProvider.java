@@ -15,7 +15,7 @@ public class FragmentedIntegerDataProvider implements DataProvider<Integer> {
         for (int i = 0; i < dataLength; i++) {
             if (--fragmentCounter <= 0) {
                 fragmentCounter = (int)(dataLength * (FRAGMENT_MIN_LENGTH + random.nextDouble() * (FRAGMENT_MAX_LENGTH - FRAGMENT_MIN_LENGTH)));
-                currentValue = random.nextInt();
+                currentValue = random.nextInt(10000);
             }
             result[i] = currentValue;
         }

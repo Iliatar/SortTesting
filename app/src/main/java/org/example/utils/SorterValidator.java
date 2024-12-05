@@ -20,11 +20,23 @@ public class SorterValidator {
 
             for (int j = 0; j < sortedBenchmarkData.length; j++) {
                 if (!sortedBenchmarkData[j].equals(sortedValidatedData[j])) {
+                    printNeighborData(j, sortedBenchmarkData, "Benchmark");
+                    printNeighborData(j, sortedValidatedData, "Sorter Unit");
                     return false;
                 }
             }
         }
 
         return true;
+    }
+
+    private static <K> void printNeighborData(int j, K[] sortedBenchmarkData, String dataName) {
+        System.out.println(dataName + " neighbor elements are: ");
+        final int neighborRadius = 5;
+        for(int k = j - neighborRadius; k < j + neighborRadius; k++) {
+            if (k < 0 || k >= sortedBenchmarkData.length) continue;
+            System.out.print(sortedBenchmarkData[k] + " ");
+        }
+        System.out.println();
     }
 }

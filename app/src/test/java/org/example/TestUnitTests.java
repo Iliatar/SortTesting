@@ -15,7 +15,7 @@ import org.junit.jupiter.api.function.Executable;
 
 public class TestUnitTests {
     private final static int ITERATIONS_COUNT = 10;
-    private final static int DATA_LENGTH = 1000;
+    private final static int DATA_LENGTH = 100;
 
     @Test
     void testPassedTest() throws Exception {

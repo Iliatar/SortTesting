@@ -1,7 +1,5 @@
 package org.example.sorterUnit;
 
-import org.example.sorterUnit.SorterUnit;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,19 +11,23 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
             return arrayToSort;
         }
 
-        Integer baseElement = arrayToSort[0];
+        int baseElementIndex = 0;
+        Integer baseElement = arrayToSort[baseElementIndex];
         List<Integer> lesserElements = new ArrayList<>();
         List<Integer> greaterElements = new ArrayList<>();
+        List<Integer> equalElements = new ArrayList<>();
 
-        for(int i = 1; i < arrayToSort.length; i++) {
-            if (arrayToSort[i] <= baseElement) {
+        for(int i = 0; i < arrayToSort.length; i++) {
+            if (arrayToSort[i].equals(baseElement)) {
+                equalElements.add(arrayToSort[i]);
+            } else if (arrayToSort[i] < baseElement) {
                 lesserElements.add(arrayToSort[i]);
-            } else {
+            } else if (arrayToSort[i] > baseElement) {
                 greaterElements.add(arrayToSort[i]);
             }
         }
 
-        Integer[] result = new Integer[lesserElements.size() + 1 + greaterElements.size()];
+        Integer[] result = new Integer[arrayToSort.length];
 
         Integer[] lesserSortedElements = sort(lesserElements.toArray(new Integer[0]));
         Integer[] greaterSortedElements = sort(greaterElements.toArray(new Integer[0]));
@@ -34,7 +36,10 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
         for (Integer value : lesserSortedElements) {
             result[i++] = value;
         }
-        result[i++] = baseElement;
+
+        for (Integer value : equalElements) {
+            result[i++] = value;
+        }
 
         for (Integer value : greaterSortedElements) {
             result[i++] = value;
@@ -50,6 +55,6 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
 
     @Override
     public String getVersion() {
-        return "0.4";
+        return "0.6";
     }
 }

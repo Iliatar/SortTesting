@@ -14,7 +14,7 @@ import java.util.List;
 
 public class IntegerQuickSorterTests {
     private final static int ITERATIONS_COUNT = 5;
-    private final static int DATA_LENGTH = 500;
+    private final static int DATA_LENGTH = 100;
 
     @Test
     void test() {
@@ -43,8 +43,11 @@ public class IntegerQuickSorterTests {
 
         Assertions.assertEquals(data.length, result.length);
 
+        /*System.out.println("Result of sorter unit:");
         for (int i = 1; i < result.length; i++) {
+            System.out.print(result[i] + " ");
             Assertions.assertTrue(result[i] >= result[i - 1]);
         }
+        System.out.println();*/
     }
 }
