@@ -61,6 +61,7 @@ public class TestUnit<K> {
 
         if(!SorterValidator.checkSorterUnitsResultEquals(sorterUnit, benchmarkUnit,
                 dataProvider, VALIDATOR_ITERATIONS_COUNT, dataLength)) {
+            //TODO если тесты не пройдены, то сообщение появляется на той же сторке, что и "Progress: 0%"
             throw new SorterUnitValidationFailedException("Tested sorter unit (" + sorterUnit.getClass().getName()
                     + ") validation failed! Result don't match benchmark unit result!");
         }

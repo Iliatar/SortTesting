@@ -63,6 +63,14 @@ public class App implements Runnable {
 
     @Override
     public void run() {
+        try {
+            runTests();
+        } catch (Exception e) {
+            System.out.println("Exception happened: " + e.getMessage());
+        }
+    }
+
+    private void runTests() throws Exception {
         SorterUnit<Integer> sorterUnit = null;
         DataProvider<Integer> dataProvider = null;
 
@@ -72,14 +80,9 @@ public class App implements Runnable {
             Class<?> sorterUnitClass = sorterClassLoader.findClass(sorterUnitClassName, sorterUnitFilePath);
             sorterUnit = (SorterUnit<Integer>) sorterUnitClass.getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException e) {
-            System.out.println("Class with name " + sorterUnitClassName + " don't have no args constructor!");
-            return;
-        } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
-            return;
-        } catch (Exception e) {
-            System.out.println("Exception happened: " + e.getMessage());
-            return;
+            throw new Exception("Sorter Class with name " + sorterUnitClassName + " don't have no args constructor!");
+        } catch (NoClassDefFoundError e) {
+            throw new Exception(sorterUnitClassName + " don't find in " + sorterUnitFilePath);
         }
 
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
@@ -98,24 +101,15 @@ public class App implements Runnable {
                 dataProvider = (DataProvider<Integer>) Class.forName(dataProviderClassName)
                         .getDeclaredConstructor().newInstance();
             } catch (ClassNotFoundException e) {
-                System.out.println("Class with name " + dataProviderClassName + " not found");
-                return;
+                throw new Exception("Provider Class with name " + dataProviderClassName + " not found");
             } catch (NoSuchMethodException e) {
-                System.out.println("Class with name " + dataProviderClassName + " don't have no args constructor");
-                return;
-            } catch (Exception e) {
-                System.out.println("Exception happened: " + e.getMessage());
-                return;
+                throw new Exception("Provider Class with name " + dataProviderClassName + " don't have no args constructor");
             }
+
             testUnit.addTestItem(new TestItem<>(dataProvider, dataLength, iterationsCount));
         }
 
-        try {
-            testUnit.runTest();
-        } catch (SorterUnitValidationFailedException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+        testUnit.runTest();
 
         if (!testUnit.isComplete()) return;
 
