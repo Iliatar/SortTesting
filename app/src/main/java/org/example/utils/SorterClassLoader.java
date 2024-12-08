@@ -28,6 +28,10 @@ public class SorterClassLoader extends ClassLoader {
         }
 
         var buffer = byteStream.toByteArray();
-        return defineClass(className, buffer, 0, buffer.length);
+        try {
+            return defineClass(className, buffer, 0, buffer.length);
+        } catch (NoClassDefFoundError e) {
+            throw new RuntimeException(className + " don't find in " + filePath);
+        }
     }
 }

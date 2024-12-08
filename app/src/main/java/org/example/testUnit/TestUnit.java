@@ -34,6 +34,12 @@ public class TestUnit<K> {
         testItemsList.add(testItem);
     }
 
+    public void addTestItemList(List<TestItem<K>> testItems) {
+        for (TestItem<K> testItem : testItems) {
+            addTestItem(testItem);
+        }
+    }
+
     public void runTest() throws SorterUnitValidationFailedException {
         int totalIterations = testItemsList.stream()
                 .map(item -> item.getIterationsCount())

@@ -13,7 +13,6 @@ import org.example.outputUnit.OutputUnit;
 import org.example.outputUnit.TextFileOutputUnit;
 import org.example.sorterUnit.BenchmarkIntegerSorter;
 import org.example.sorterUnit.SorterUnit;
-import org.example.testUnit.SorterUnitValidationFailedException;
 import org.example.testUnit.TestItem;
 import org.example.testUnit.TestUnit;
 import org.example.utils.SorterClassLoader;
@@ -22,18 +21,21 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Command(
         name = "test",
         description = "Test sorter unit benchmark"
 )
 public class App implements Runnable {
     @Parameters(index = "0", arity = "1",
-                    description = "Full name of class, which will be tested. " +
+            description = "Full name of class, which will be tested. " +
                     "Class must have no args constructor and implements SorterUnit interface")
     private String sorterUnitClassName;
 
     @Parameters(index = "1", arity = "1",
-                description = "File path if class, which will be tested (i.e. '../testedSorter.class').")
+            description = "File path if class, which will be tested (i.e. '../testedSorter.class').")
     private String sorterUnitFilePath;
 
     @Option(names = {"-i", "--iterations"}, description = "Test iterations count",
@@ -71,42 +73,22 @@ public class App implements Runnable {
     }
 
     private void runTests() throws Exception {
-        SorterUnit<Integer> sorterUnit = null;
-        DataProvider<Integer> dataProvider = null;
+        Class<SorterUnit<Integer>> sorterUnitClass = (Class<SorterUnit<Integer>>) loadClassFromFile(sorterUnitClassName, sorterUnitFilePath);
 
-        //TODO выделить в отдельный метод
-        try {
-            SorterClassLoader sorterClassLoader = new SorterClassLoader();
-            Class<?> sorterUnitClass = sorterClassLoader.findClass(sorterUnitClassName, sorterUnitFilePath);
-            sorterUnit = (SorterUnit<Integer>) sorterUnitClass.getDeclaredConstructor().newInstance();
-        } catch (NoSuchMethodException e) {
-            throw new Exception("Sorter Class with name " + sorterUnitClassName + " don't have no args constructor!");
-        } catch (NoClassDefFoundError e) {
-            throw new Exception(sorterUnitClassName + " don't find in " + sorterUnitFilePath);
-        }
+        SorterUnit<Integer> sorterUnit = getClassInstance(sorterUnitClass);
 
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
 
         var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter);
-        if(complex) {
-            testUnit.addTestItem(new TestItem<>(new SimpleIntegerDataProvider(), 100, 1000));
-            testUnit.addTestItem(new TestItem<>(new SimpleIntegerDataProvider(), 1000, 3000));
-            testUnit.addTestItem(new TestItem<>(new SimpleIntegerDataProvider(), 5000, 2000));
-            testUnit.addTestItem(new TestItem<>(new FragmentedIntegerDataProvider(), 100, 1000));
-            testUnit.addTestItem(new TestItem<>(new FragmentedIntegerDataProvider(), 1000, 3000));
-            testUnit.addTestItem(new TestItem<>(new FragmentedIntegerDataProvider(), 5000, 2000));
+        if (complex) {
+            testUnit.addTestItemList(getIntegerComplexTestItems());
         } else {
-            //TODO выделить в отдельный метод
             try {
-                dataProvider = (DataProvider<Integer>) Class.forName(dataProviderClassName)
-                        .getDeclaredConstructor().newInstance();
+                DataProvider<Integer> dataProvider = (DataProvider<Integer>) getClassInstance(Class.forName(dataProviderClassName));
+                testUnit.addTestItem(new TestItem<>(dataProvider, dataLength, iterationsCount));
             } catch (ClassNotFoundException e) {
                 throw new Exception("Provider Class with name " + dataProviderClassName + " not found");
-            } catch (NoSuchMethodException e) {
-                throw new Exception("Provider Class with name " + dataProviderClassName + " don't have no args constructor");
             }
-
-            testUnit.addTestItem(new TestItem<>(dataProvider, dataLength, iterationsCount));
         }
 
         testUnit.runTest();
@@ -118,5 +100,30 @@ public class App implements Runnable {
                 ? new TextFileOutputUnit(basicOutputGenerator, testUnit)
                 : new ConsoleOutputUnit(basicOutputGenerator, testUnit);
         outputUnit.writeOutput();
+    }
+
+    private List<TestItem<Integer>> getIntegerComplexTestItems() {
+        List<TestItem<Integer>> result = new ArrayList<>();
+        result.add(new TestItem<>(new SimpleIntegerDataProvider(), 100, 1000));
+        result.add(new TestItem<>(new SimpleIntegerDataProvider(), 1000, 3000));
+        result.add(new TestItem<>(new SimpleIntegerDataProvider(), 5000, 2000));
+        result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 100, 1000));
+        result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 1000, 3000));
+        result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 5000, 2000));
+        return result;
+    }
+
+    private <K> K getClassInstance(Class<K> classObject) throws Exception {
+        try {
+            return classObject.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException e) {
+            throw new Exception("Class " + sorterUnitClassName + " don't have no args constructor!");
+        }
+    }
+
+    private Class<?> loadClassFromFile(String className, String filePath) throws Exception {
+        SorterClassLoader sorterClassLoader = new SorterClassLoader();
+        Class<?> classReference = sorterClassLoader.findClass(className, filePath);
+        return classReference;
     }
 }
