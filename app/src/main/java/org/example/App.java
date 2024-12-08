@@ -68,7 +68,7 @@ public class App implements Runnable {
         try {
             runTests();
         } catch (Exception e) {
-            System.out.println("Exception happened: " + e.getMessage());
+            System.out.println("\nException happened: " + e.getMessage());
         }
     }
 
@@ -106,10 +106,10 @@ public class App implements Runnable {
         List<TestItem<Integer>> result = new ArrayList<>();
         result.add(new TestItem<>(new SimpleIntegerDataProvider(), 100, 1000));
         result.add(new TestItem<>(new SimpleIntegerDataProvider(), 1000, 3000));
-        result.add(new TestItem<>(new SimpleIntegerDataProvider(), 5000, 2000));
+        result.add(new TestItem<>(new SimpleIntegerDataProvider(), 5000, 2250));
         result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 100, 1000));
         result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 1000, 3000));
-        result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 5000, 2000));
+        result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 5000, 2250));
         return result;
     }
 

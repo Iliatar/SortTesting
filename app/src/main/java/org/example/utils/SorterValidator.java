@@ -31,6 +31,7 @@ public class SorterValidator {
     }
 
     private static <K> void printNeighborData(int j, K[] sortedBenchmarkData, String dataName) {
+        System.out.println();
         System.out.println(dataName + " neighbor elements are: ");
         final int neighborRadius = 5;
         for(int k = j - neighborRadius; k < j + neighborRadius; k++) {
