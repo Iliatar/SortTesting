@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class SorterClassLoader extends ClassLoader {
+public class FileClassLoader extends ClassLoader {
     @Override
     public Class findClass(String className, String filePath) {
         InputStream inputStream = null;
@@ -31,7 +31,21 @@ public class SorterClassLoader extends ClassLoader {
         try {
             return defineClass(className, buffer, 0, buffer.length);
         } catch (NoClassDefFoundError e) {
-            throw new RuntimeException(className + " don't find in " + filePath);
+            throw new RuntimeException("Class " + className + " don't find in " + filePath);
         }
+    }
+
+    public static <K> K getClassInstance(Class<K> classObject) throws Exception {
+        try {
+            return classObject.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException e) {
+            throw new Exception("Class " + classObject.getName() + " don't have no args constructor!");
+        }
+    }
+
+    public static Class<?> loadClassFromFile(String className, String filePath) throws Exception {
+        FileClassLoader fileClassLoader = new FileClassLoader();
+        Class<?> classReference = fileClassLoader.findClass(className, filePath);
+        return classReference;
     }
 }

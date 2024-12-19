@@ -3,7 +3,6 @@
  */
 package org.example;
 
-import org.example.dataProvider.DataProvider;
 import org.example.dataProvider.FragmentedIntegerDataProvider;
 import org.example.dataProvider.SimpleIntegerDataProvider;
 import org.example.outputGenerators.BasicOutputGenerator;
@@ -14,13 +13,13 @@ import org.example.outputUnit.TextFileOutputUnit;
 import org.example.sorterUnit.BenchmarkIntegerSorter;
 import org.example.sorterUnit.SorterUnit;
 import org.example.testUnit.TestItem;
-import org.example.testUnit.TestUnit;
-import org.example.utils.SorterClassLoader;
+import org.example.xmlconfig.ConfigurationParser;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,33 +29,11 @@ import java.util.List;
 )
 public class App implements Runnable {
     @Parameters(index = "0", arity = "1",
-            description = "Full name of class, which will be tested. " +
-                    "Class must have no args constructor and implements SorterUnit interface")
-    private String sorterUnitClassName;
-
-    @Parameters(index = "1", arity = "1",
-            description = "File path if class, which will be tested (i.e. '../testedSorter.class').")
-    private String sorterUnitFilePath;
-
-    @Option(names = {"-i", "--iterations"}, description = "Test iterations count",
-            defaultValue = "5000", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    private Integer iterationsCount;
-
-    @Option(names = {"-l", "--dataLength"}, description = "Test data size",
-            defaultValue = "8000", showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    private Integer dataLength;
+            description = "File path with json test configuration. ")
+    private String configurationFilePath;
 
     @Option(names = {"-f", "--fileOutput"}, description = "Output to file flag")
     private boolean fileOutput;
-
-    @Option(names = {"-c", "--complex"}, description = "Complex benchmark flag. Overrides -l, -d and -i options")
-    private boolean complex;
-
-    @Option(names = {"-d", "--dataProvider"}, description = "Name of class, which will be used as data provider. " +
-            "Class must have no args constructor and implements DataProvider interface",
-            defaultValue = "org.example.dataProvider.SimpleIntegerDataProvider",
-            showDefaultValue = CommandLine.Help.Visibility.ALWAYS)
-    private String dataProviderClassName = "org.example.dataProvider.SimpleIntegerDataProvider";
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new App()).execute(args);
@@ -73,23 +50,10 @@ public class App implements Runnable {
     }
 
     private void runTests() throws Exception {
-        Class<SorterUnit<Integer>> sorterUnitClass = (Class<SorterUnit<Integer>>) loadClassFromFile(sorterUnitClassName, sorterUnitFilePath);
-
-        SorterUnit<Integer> sorterUnit = getClassInstance(sorterUnitClass);
-
         SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
+        File configurationFile = new File(configurationFilePath);
 
-        var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter);
-        if (complex) {
-            testUnit.addTestItemList(getIntegerComplexTestItems());
-        } else {
-            try {
-                DataProvider<Integer> dataProvider = (DataProvider<Integer>) getClassInstance(Class.forName(dataProviderClassName));
-                testUnit.addTestItem(new TestItem<>(dataProvider, dataLength, iterationsCount));
-            } catch (ClassNotFoundException e) {
-                throw new Exception("Provider Class with name " + dataProviderClassName + " not found");
-            }
-        }
+        var testUnit = ConfigurationParser.getTestUnit(benchmarkSorter, configurationFile);
 
         testUnit.runTest();
 
@@ -100,30 +64,5 @@ public class App implements Runnable {
                 ? new TextFileOutputUnit(basicOutputGenerator, testUnit)
                 : new ConsoleOutputUnit(basicOutputGenerator, testUnit);
         outputUnit.writeOutput();
-    }
-
-    private List<TestItem<Integer>> getIntegerComplexTestItems() {
-        List<TestItem<Integer>> result = new ArrayList<>();
-        result.add(new TestItem<>(new SimpleIntegerDataProvider(), 100, 1000));
-        result.add(new TestItem<>(new SimpleIntegerDataProvider(), 1000, 3000));
-        result.add(new TestItem<>(new SimpleIntegerDataProvider(), 5000, 2250));
-        result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 100, 1000));
-        result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 1000, 3000));
-        result.add(new TestItem<>(new FragmentedIntegerDataProvider(), 5000, 2250));
-        return result;
-    }
-
-    private <K> K getClassInstance(Class<K> classObject) throws Exception {
-        try {
-            return classObject.getDeclaredConstructor().newInstance();
-        } catch (NoSuchMethodException e) {
-            throw new Exception("Class " + sorterUnitClassName + " don't have no args constructor!");
-        }
-    }
-
-    private Class<?> loadClassFromFile(String className, String filePath) throws Exception {
-        SorterClassLoader sorterClassLoader = new SorterClassLoader();
-        Class<?> classReference = sorterClassLoader.findClass(className, filePath);
-        return classReference;
     }
 }
