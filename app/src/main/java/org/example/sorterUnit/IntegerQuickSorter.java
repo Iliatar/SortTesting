@@ -11,6 +11,14 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
             return arrayToSort;
         }
 
+        if (arrayToSort.length == 2) {
+            if (arrayToSort[0] < arrayToSort[1]) {
+                return arrayToSort;
+            } else {
+                return new Integer[]{arrayToSort[1], arrayToSort[0]};
+            }
+        }
+
         int baseElementIndex = arrayToSort.length / 2;
         Integer baseElement = arrayToSort[baseElementIndex];
         List<Integer> lesserElements = new LinkedList<>();
