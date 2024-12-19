@@ -38,3 +38,9 @@ package.json
 
 ### VS Code ###
 .vscode/
+
+### Test Config ###
+app/*.json
+
+### Test Results ###
+app/*.txt
