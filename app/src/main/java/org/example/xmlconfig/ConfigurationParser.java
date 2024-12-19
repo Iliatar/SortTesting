@@ -1,5 +1,6 @@
 package org.example.xmlconfig;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dataProvider.DataProvider;
 import org.example.sorterUnit.SorterUnit;
@@ -38,13 +39,19 @@ public class ConfigurationParser {
     }
 
     private static class TestConfiguration {
+        @JsonProperty("className")
         String sorterUnitClassName;
+        @JsonProperty("filePath")
         String sorterUnitClassFilePath;
+        @JsonProperty("testItems")
         List<TestConfigurationItem> testConfigurationItems;
 
         private static class TestConfigurationItem {
+            @JsonProperty("dataProvider")
             String dataProviderClassName;
+            @JsonProperty("dataLength")
             int dataLength;
+            @JsonProperty("iterations")
             int iterationsCount;
 
             public String getDataProviderClassName() {
