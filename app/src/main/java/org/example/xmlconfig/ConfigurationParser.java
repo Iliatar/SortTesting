@@ -22,13 +22,16 @@ public class ConfigurationParser {
         TestUnit<K> testUnit = new TestUnit<>(sorterUnit, benchmarkUnit);
 
         for(TestConfiguration.TestConfigurationItem configurationItem : testConfiguration.getTestConfigurationItems()) {
-            DataProvider<K> dataProvider = (DataProvider<K>)
-                    FileClassLoader.getClassInstance(Class.forName(configurationItem.getDataProviderClassName()));
-
-            TestItem<K> testItem = new TestItem<>(dataProvider,
-                    configurationItem.getDataLength(),
-                    configurationItem.getIterationsCount());
-            testUnit.addTestItem(testItem);
+            try {
+                DataProvider<K> dataProvider = (DataProvider<K>)
+                        FileClassLoader.getClassInstance(Class.forName(configurationItem.getDataProviderClassName()));
+                TestItem<K> testItem = new TestItem<>(dataProvider,
+                        configurationItem.getDataLength(),
+                        configurationItem.getIterationsCount());
+                testUnit.addTestItem(testItem);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Provider class " + configurationItem.getDataProviderClassName() + " not found");
+            }
         }
 
         return testUnit;
