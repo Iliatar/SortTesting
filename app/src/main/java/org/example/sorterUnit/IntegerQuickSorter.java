@@ -1,6 +1,6 @@
 package org.example.sorterUnit;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class IntegerQuickSorter implements SorterUnit<Integer> {
@@ -11,19 +11,19 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
             return arrayToSort;
         }
 
-        int baseElementIndex = 0;
+        int baseElementIndex = arrayToSort.length / 2;
         Integer baseElement = arrayToSort[baseElementIndex];
-        List<Integer> lesserElements = new ArrayList<>();
-        List<Integer> greaterElements = new ArrayList<>();
-        List<Integer> equalElements = new ArrayList<>();
+        List<Integer> lesserElements = new LinkedList<>();
+        List<Integer> greaterElements = new LinkedList<>();
+        int equalElementsCount = 0;
 
         for(int i = 0; i < arrayToSort.length; i++) {
-            if (arrayToSort[i].equals(baseElement)) {
-                equalElements.add(arrayToSort[i]);
-            } else if (arrayToSort[i] < baseElement) {
+            if (arrayToSort[i] < baseElement) {
                 lesserElements.add(arrayToSort[i]);
             } else if (arrayToSort[i] > baseElement) {
                 greaterElements.add(arrayToSort[i]);
+            } else {
+                equalElementsCount++;
             }
         }
 
@@ -37,8 +37,8 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
             result[i++] = value;
         }
 
-        for (Integer value : equalElements) {
-            result[i++] = value;
+        for (int j = 1; j <= equalElementsCount; j++) {
+            result[i++] = Integer.valueOf(baseElement.intValue());
         }
 
         for (Integer value : greaterSortedElements) {
@@ -55,6 +55,6 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
 
     @Override
     public String getVersion() {
-        return "0.6";
+        return "0.65";
     }
 }
