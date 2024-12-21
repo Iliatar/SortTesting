@@ -25,6 +25,8 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
         List<Integer> greaterElements = new LinkedList<>();
         int equalElementsCount = 0;
 
+        //boolean arrayIsSorted = true;
+
         for(int i = 0; i < arrayToSort.length; i++) {
             if (arrayToSort[i] < baseElement) {
                 lesserElements.add(arrayToSort[i]);
@@ -33,7 +35,12 @@ public class IntegerQuickSorter implements SorterUnit<Integer> {
             } else {
                 equalElementsCount++;
             }
+            /*if (i > 0 && arrayIsSorted && arrayToSort[i] < arrayToSort[i-1]) {
+                arrayIsSorted = false;
+            }*/
         }
+
+        //if (arrayIsSorted) return arrayToSort;
 
         Integer[] result = new Integer[arrayToSort.length];
 
