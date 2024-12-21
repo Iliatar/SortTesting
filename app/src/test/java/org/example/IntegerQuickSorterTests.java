@@ -1,8 +1,6 @@
 package org.example;
 
-import org.example.dataProvider.DataProvider;
-import org.example.dataProvider.FragmentedIntegerDataProvider;
-import org.example.dataProvider.SimpleIntegerDataProvider;
+import org.example.dataProvider.*;
 import org.example.sorterUnit.BenchmarkIntegerSorter;
 import org.example.sorterUnit.IntegerQuickSorter;
 import org.example.sorterUnit.SorterUnit;
@@ -21,6 +19,8 @@ public class IntegerQuickSorterTests {
         List<DataProvider<Integer>> dataProviders = new ArrayList<>();
         dataProviders.add(new SimpleIntegerDataProvider());
         dataProviders.add(new FragmentedIntegerDataProvider());
+        dataProviders.add(new AlmostSortedIntegerDataProvider());
+        dataProviders.add(new SortedIntegerDataProvider());
 
         List<SorterUnit<Integer>> sorterUnits = new ArrayList<>();
         sorterUnits.add(new BenchmarkIntegerSorter());
