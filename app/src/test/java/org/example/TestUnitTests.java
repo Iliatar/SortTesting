@@ -19,12 +19,12 @@ public class TestUnitTests {
 
     @Test
     void testPassedTest() throws Exception {
-        SorterUnit<Integer> sorterUnit = new IntegerQuickSorter();
-        DataProvider<Integer> dataProvider = new SimpleIntegerDataProvider();
-        SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
+        IntegerQuickSorter sorterUnit = new IntegerQuickSorter();
+        SimpleIntegerDataProvider dataProvider = new SimpleIntegerDataProvider();
+        BenchmarkIntegerSorter benchmarkSorter = new BenchmarkIntegerSorter();
 
-        var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter);
-        var testItem = new TestItem<>(dataProvider, DATA_LENGTH, ITERATIONS_COUNT);
+        var testUnit = new TestUnit(Integer.class, sorterUnit, benchmarkSorter);
+        var testItem = new TestItem(dataProvider, DATA_LENGTH, ITERATIONS_COUNT);
         testUnit.addTestItem(testItem);
         testUnit.runTest();
 
@@ -37,12 +37,12 @@ public class TestUnitTests {
 
     @Test
     void testValidationFailed() {
-        SorterUnit<Integer> sorterUnit = new InvalidSorterUnit();
-        DataProvider<Integer> dataProvider = new SimpleIntegerDataProvider();
-        SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
+        InvalidSorterUnit sorterUnit = new InvalidSorterUnit();
+        SimpleIntegerDataProvider dataProvider = new SimpleIntegerDataProvider();
+        BenchmarkIntegerSorter benchmarkSorter = new BenchmarkIntegerSorter();
 
-        var testUnit = new TestUnit<>(sorterUnit, benchmarkSorter);
-        var testItem = new TestItem<>(dataProvider, DATA_LENGTH, ITERATIONS_COUNT);
+        var testUnit = new TestUnit(Integer.class, sorterUnit, benchmarkSorter);
+        var testItem = new TestItem(dataProvider, DATA_LENGTH, ITERATIONS_COUNT);
         testUnit.addTestItem(testItem);
         Assertions.assertThrowsExactly(SorterUnitValidationFailedException.class, () -> testUnit.runTest());
     }

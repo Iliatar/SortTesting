@@ -15,7 +15,7 @@ public class TextFileOutputUnit  extends OutputUnit {
     }
 
     @Override
-    public void writeOutput() {
+    public void writeOutput() throws Exception {
         String fileNameBase = testUnit.getSorterUnit().getClass().getName() + LocalDate.now() + "_";
         String fileExtension = ".txt";
         int fileSuffix = 1;

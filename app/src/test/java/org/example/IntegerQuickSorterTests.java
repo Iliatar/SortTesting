@@ -4,6 +4,7 @@ import org.example.dataProvider.*;
 import org.example.sorterUnit.BenchmarkIntegerSorter;
 import org.example.sorterUnit.IntegerQuickSorter;
 import org.example.sorterUnit.SorterUnit;
+import org.example.utils.SorterValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -16,20 +17,21 @@ public class IntegerQuickSorterTests {
 
     @Test
     void test() {
-        List<DataProvider<Integer>> dataProviders = new ArrayList<>();
+        List<Object> dataProviders = new ArrayList<>();
         dataProviders.add(new SimpleIntegerDataProvider());
         dataProviders.add(new FragmentedIntegerDataProvider());
         dataProviders.add(new AlmostSortedIntegerDataProvider());
         dataProviders.add(new SortedIntegerDataProvider());
 
-        List<SorterUnit<Integer>> sorterUnits = new ArrayList<>();
+        List<Object> sorterUnits = new ArrayList<>();
         sorterUnits.add(new BenchmarkIntegerSorter());
         sorterUnits.add(new IntegerQuickSorter());
 
         for(var sorterUnit : sorterUnits) {
             for (var dataProvider : dataProviders) {
                 for(int i = 0; i < ITERATIONS_COUNT; i ++) {
-                    testSorterUnit(sorterUnit, dataProvider);
+                    Assertions.assertDoesNotThrow(() -> Assertions.assertTrue(SorterValidator.checkSorterUnitsResultEquals(Integer.class, sorterUnit,
+                            new BenchmarkIntegerSorter(), dataProvider, ITERATIONS_COUNT, DATA_LENGTH)));
                 }
                 System.out.println("Test for " + sorterUnit.getClass().getName()
                         + " by " + dataProvider.getClass().getName() + " passed.");

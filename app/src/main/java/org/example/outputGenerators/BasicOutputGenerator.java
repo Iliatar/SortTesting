@@ -14,7 +14,7 @@ public class BasicOutputGenerator implements OutputGenerator {
     private final DecimalFormat df = new DecimalFormat("#.###");
 
     @Override
-    public <K> String generateOutput(TestUnit<K> testUnit) {
+    public String generateOutput(TestUnit testUnit) throws Exception {
 
         StringBuilder resultInfoBuilder = new StringBuilder();
 
@@ -28,22 +28,22 @@ public class BasicOutputGenerator implements OutputGenerator {
         resultInfoBuilder.append("\n\nSorter unit: ");
         resultInfoBuilder.append(sorterUnit.getClass().getName());
         resultInfoBuilder.append("\nDescription: ");
-        resultInfoBuilder.append(sorterUnit.getDescription());
+        resultInfoBuilder.append(sorterUnit.getClass().getMethod("getDescription").invoke(sorterUnit));
         resultInfoBuilder.append("\nVersion: ");
-        resultInfoBuilder.append(sorterUnit.getVersion());
+        resultInfoBuilder.append(sorterUnit.getClass().getMethod("getVersion").invoke(sorterUnit));
 
         resultInfoBuilder.append("\n\nBenchmark unit: ");
         resultInfoBuilder.append(benchmarkUnit.getClass().getName());
         resultInfoBuilder.append("\nDescription: ");
-        resultInfoBuilder.append(benchmarkUnit.getDescription());
+        resultInfoBuilder.append(benchmarkUnit.getClass().getMethod("getDescription").invoke(benchmarkUnit));
         resultInfoBuilder.append("\nVersion: ");
-        resultInfoBuilder.append(benchmarkUnit.getVersion());
+        resultInfoBuilder.append(benchmarkUnit.getClass().getMethod("getVersion").invoke(benchmarkUnit));
         resultInfoBuilder.append("\n----------------------------------------------------");
 
         double benchmarkEfficiency = 0;
         int totalIterations = 0;
 
-        for(TestItem<K> testItem : testUnit.getTestItemsList()) {
+        for(TestItem testItem : testUnit.getTestItemsList()) {
             var testItemResult = new TestItemResult(testItem);
             resultInfoBuilder.append(generateItemOutput(testItemResult));
             benchmarkEfficiency += testItemResult.benchmarkEfficiency * testItem.getIterationsCount();

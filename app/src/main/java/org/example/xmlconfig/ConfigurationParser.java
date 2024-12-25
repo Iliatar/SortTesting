@@ -2,31 +2,32 @@ package org.example.xmlconfig;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.dataProvider.DataProvider;
-import org.example.sorterUnit.SorterUnit;
 import org.example.testUnit.TestItem;
 import org.example.testUnit.TestUnit;
+import org.example.utils.BenchmarksLibrary;
 import org.example.utils.FileClassLoader;
 
 import java.io.File;
 import java.util.List;
 
 public class ConfigurationParser {
-    public static <K> TestUnit<K> getTestUnit(SorterUnit<K> benchmarkUnit, File file)  throws Exception  {
+    public static TestUnit getTestUnit(File file)  throws Exception  {
         ObjectMapper objectMapper = new ObjectMapper();
         TestConfiguration testConfiguration = objectMapper.readValue(file, TestConfiguration.class);
 
-        Class<SorterUnit<K>> sorterUnitClass = (Class<SorterUnit<K>>)
-                FileClassLoader.loadClassFromFile(testConfiguration.sorterUnitClassName, testConfiguration.sorterUnitClassFilePath);
-        SorterUnit<K> sorterUnit = FileClassLoader.getClassInstance(sorterUnitClass);
+        Class<?> sorterUnitClass = FileClassLoader.loadClassFromFile(testConfiguration.sorterUnitClassName, testConfiguration.sorterUnitClassFilePath);
+        Object sorterUnit = FileClassLoader.getClassInstance(sorterUnitClass);
 
-        TestUnit<K> testUnit = new TestUnit<>(sorterUnit, benchmarkUnit);
+        Class unitClass = Class.forName(testConfiguration.getUnitClassName());
+        Object benchmarkUnit = BenchmarksLibrary.getBenchmarkUnit(unitClass);
+
+        TestUnit testUnit = new TestUnit(unitClass, sorterUnit, benchmarkUnit);
 
         for(TestConfiguration.TestConfigurationItem configurationItem : testConfiguration.getTestConfigurationItems()) {
             try {
-                DataProvider<K> dataProvider = (DataProvider<K>)
-                        FileClassLoader.getClassInstance(Class.forName(configurationItem.getDataProviderClassName()));
-                TestItem<K> testItem = new TestItem<>(dataProvider,
+                Class dataProviderClass = Class.forName(configurationItem.getDataProviderClassName());
+                Object dataProvider = FileClassLoader.getClassInstance(dataProviderClass);
+                TestItem testItem = new TestItem(dataProvider,
                         configurationItem.getDataLength(),
                         configurationItem.getIterationsCount());
                 testUnit.addTestItem(testItem);
@@ -38,7 +39,10 @@ public class ConfigurationParser {
         return testUnit;
     }
 
+    //TODO добавить тесты на парсинг
     private static class TestConfiguration {
+        @JsonProperty("unitClassName")
+        String unitClassName;
         @JsonProperty("className")
         String sorterUnitClassName;
         @JsonProperty("filePath")
@@ -101,6 +105,14 @@ public class ConfigurationParser {
 
         public void setTestConfigurationItems(List<TestConfigurationItem> testConfigurationItems) {
             this.testConfigurationItems = testConfigurationItems;
+        }
+
+        public String getUnitClassName() {
+            return unitClassName;
+        }
+
+        public void setUnitClassName(String unitClassName) {
+            this.unitClassName = unitClassName;
         }
     }
 }

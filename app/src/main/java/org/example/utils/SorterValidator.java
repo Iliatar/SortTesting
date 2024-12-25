@@ -3,16 +3,22 @@ package org.example.utils;
 import org.example.dataProvider.DataProvider;
 import org.example.sorterUnit.SorterUnit;
 
+import java.lang.reflect.Method;
+
 public class SorterValidator {
-    public static <K> boolean checkSorterUnitsResultEquals(SorterUnit<K> validatedUnit,
-                                                           SorterUnit<K> benchmarkUnit,
-                                                           DataProvider<K> dataProvider,
-                                                           int iterationsCount,
-                                                           int dataLength) {
+    public static boolean checkSorterUnitsResultEquals(Class<?> unitClass,
+                                                       Object validatedUnit,
+                                                       Object benchmarkUnit,
+                                                       Object dataProvider,
+                                                       int iterationsCount,
+                                                       int dataLength) throws Exception {
         for(int i = 0; i < iterationsCount; i++) {
-            K[] data = dataProvider.getData(dataLength);
-            K[] sortedValidatedData = validatedUnit.sort(data.clone());
-            K[] sortedBenchmarkData = benchmarkUnit.sort(data.clone());
+            Method getDataMethod = dataProvider.getClass().getMethod("getData", int.class);
+            Object[] data = (Object[]) getDataMethod.invoke(dataProvider, dataLength);
+            Method sortValidatedUnitMethod = validatedUnit.getClass().getMethod("sort", unitClass.arrayType());
+            Object[] sortedValidatedData = (Object[]) sortValidatedUnitMethod.invoke(validatedUnit, new Object[] {data.clone()});
+            Method sortBenchmarkUnitMethod = benchmarkUnit.getClass().getMethod("sort", unitClass.arrayType());
+            Object[] sortedBenchmarkData = (Object[]) sortBenchmarkUnitMethod.invoke(benchmarkUnit, new Object[] {data.clone()});
 
             if (sortedBenchmarkData.length != sortedValidatedData.length) {
                 return false;
@@ -30,7 +36,7 @@ public class SorterValidator {
         return true;
     }
 
-    private static <K> void printNeighborData(int j, K[] sortedBenchmarkData, String dataName) {
+    private static void printNeighborData(int j, Object[] sortedBenchmarkData, String dataName) {
         System.out.println();
         System.out.println(dataName + " neighbor elements are: ");
         final int neighborRadius = 5;

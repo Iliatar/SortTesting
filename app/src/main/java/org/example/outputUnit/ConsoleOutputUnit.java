@@ -9,7 +9,7 @@ public class ConsoleOutputUnit extends OutputUnit {
     }
 
     @Override
-    public void writeOutput() {
+    public void writeOutput() throws Exception {
         System.out.println(outputGenerator.generateOutput(testUnit));
     }
 }

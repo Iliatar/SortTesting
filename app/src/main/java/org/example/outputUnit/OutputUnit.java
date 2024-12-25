@@ -12,5 +12,5 @@ public abstract class OutputUnit {
         this.testUnit = testUnit;
     }
 
-    public abstract void writeOutput();
+    public abstract void writeOutput() throws Exception;
 }

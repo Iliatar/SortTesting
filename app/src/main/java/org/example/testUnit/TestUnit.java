@@ -1,46 +1,41 @@
 package org.example.testUnit;
 
 import org.example.utils.SorterValidator;
-import org.example.dataProvider.DataProvider;
-import org.example.sorterUnit.SorterUnit;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class TestUnit<K> {
+public class TestUnit {
     private static final int VALIDATOR_ITERATIONS_COUNT = 10;
     private static final double ONE_POINT_PROGRESS = 4f;
     private static final int MILESTONE_POINTS_COUNT = 5;
 
-    private final SorterUnit<K> sorterUnit;
-    private final SorterUnit<K> benchmarkUnit;
-    private final List<TestItem<K>> testItemsList;
+    private final Class<?> unitClass;
+    private final Object sorterUnit;
+    private final Object benchmarkUnit;
+    private final List<TestItem> testItemsList;
     private double iterationProgress;
     private double currentPercentProgress = 0;
     private double totalProgress = 0;
     private boolean completeFlag = false;
 
-    public TestUnit(SorterUnit<K> sorterUnit, SorterUnit<K> benchmarkUnit) {
+    public TestUnit(Class<?> unitClass, Object sorterUnit, Object benchmarkUnit) {
         this.sorterUnit = sorterUnit;
         this.benchmarkUnit = benchmarkUnit;
+        this.unitClass = unitClass;
         testItemsList = new ArrayList<>();
     }
 
-    public void addTestItem(TestItem<K> testItem) {
+    public void addTestItem(TestItem testItem) {
         testItemsList.add(testItem);
     }
 
-    public void addTestItemList(List<TestItem<K>> testItems) {
-        for (TestItem<K> testItem : testItems) {
-            addTestItem(testItem);
-        }
-    }
-
-    public void runTest() throws SorterUnitValidationFailedException {
+    public void runTest() throws Exception {
         int totalIterations = testItemsList.stream()
                 .map(item -> item.getIterationsCount())
                 .reduce(0, (x,y) -> x + y);
@@ -57,7 +52,9 @@ public class TestUnit<K> {
         System.out.println("\nTests complete!");
     }
 
-    public void processTestItem(TestItem<K> testItem) throws SorterUnitValidationFailedException {
+    public void processTestItem(TestItem testItem) throws Exception{
+
+        checkTestItem(testItem);
 
         testItem.initialize();
 
@@ -65,17 +62,11 @@ public class TestUnit<K> {
         var dataLength = testItem.getDataLength();
         var iterationsCount = testItem.getIterationsCount();
 
-        if(!SorterValidator.checkSorterUnitsResultEquals(sorterUnit, benchmarkUnit,
-                dataProvider, VALIDATOR_ITERATIONS_COUNT, dataLength)) {
-            //TODO если тесты не пройдены, то сообщение появляется на той же сторке, что и "Progress: 0%"
-            throw new SorterUnitValidationFailedException("Tested sorter unit (" + sorterUnit.getClass().getName()
-                    + ") validation failed! Result don't match benchmark unit result!");
-        }
-
         DecimalFormat df = new DecimalFormat("#");
 
         for (int iterationNum = 0; iterationNum < iterationsCount; iterationNum++) {
-            K[] data = dataProvider.getData(dataLength);
+            Method getDataMethod = dataProvider.getClass().getMethod("getData", int.class);
+            Object[] data = (Object[]) getDataMethod.invoke(dataProvider, dataLength);
             testItem.setSorterUnitResult(iterationNum, runTest(data, sorterUnit));
             testItem.setBenchmarkResult(iterationNum, runTest(data, benchmarkUnit));
 
@@ -95,23 +86,103 @@ public class TestUnit<K> {
         testItem.close();
     }
 
-    private <K> long runTest(K[] data, SorterUnit<K> sorterUnit) {
-        data = Arrays.copyOf(data, data.length);
+    private long runTest(Object[] data, Object sorterUnit) throws Exception {
+        Method m = sorterUnit.getClass().getMethod("sort", unitClass.arrayType());
         Instant startTime = Instant.now();
-        sorterUnit.sort(data);
+        m.invoke(sorterUnit, new Object[] {unitClass.arrayType().cast(data)});
         Instant endTime = Instant.now();
         return Duration.between(startTime, endTime).toNanos();
     }
 
-    public SorterUnit<K> getSorterUnit() {
+    private void checkTestItem(TestItem testItem) throws Exception {
+        Class sorterUnitClass = sorterUnit.getClass();
+        checkSorterUnitClass(sorterUnitClass);
+
+        Class benchmarkUnitClass = benchmarkUnit.getClass();
+        checkSorterUnitClass(benchmarkUnitClass);
+
+        Class providerUnitClass = testItem.getDataProvider().getClass();
+        checkProviderUnitClass(providerUnitClass);
+
+
+        if(!SorterValidator.checkSorterUnitsResultEquals(unitClass,
+                sorterUnit,
+                benchmarkUnit,
+                testItem.getDataProvider(),
+                VALIDATOR_ITERATIONS_COUNT,
+                testItem.getDataLength())) {
+            //TODO если тесты не пройдены, то сообщение появляется на той же сторке, что и "Progress: 0%"
+            throw new SorterUnitValidationFailedException("Tested sorter unit (" + sorterUnit.getClass().getName()
+                    + ") validation failed! Result don't match benchmark unit result!");
+        }
+    }
+
+    //TODO вынести в отдельный класс
+    //TODO сделать код более гибким - проверять метод через подачу на вход параметров
+    private void checkSorterUnitClass(Class sorterUnitClass) throws NoSuchMethodException,
+            SorterUnitClassValidationFailedException {
+        Method sortMethod = sorterUnitClass.getMethod("sort", unitClass.arrayType());
+
+        if (sortMethod.getParameterCount() != 1) {
+            throw new SorterUnitClassValidationFailedException("Sorter class " + sorterUnitClass.getName()
+                    + " sort method parameters count doesn't equals 1");
+        }
+        if (!sortMethod.getParameterTypes()[0].isArray() ||
+                sortMethod.getParameterTypes()[0].getComponentType() != unitClass) {
+            throw new SorterUnitClassValidationFailedException("Sorter class " + sorterUnitClass.getName()
+                    + " sort method argument type doesn't " + unitClass.getName() + "[]");
+        }
+        if (!sortMethod.getReturnType().isArray() ||
+                sortMethod.getReturnType().getComponentType() != unitClass) {
+            throw new SorterUnitClassValidationFailedException("Sorter class " + sorterUnitClass.getName()
+                    + " sort method return type doesn't " + unitClass.getName() + "[]");
+        }
+
+        try {
+            sorterUnitClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new SorterUnitClassValidationFailedException("Sorter class " + sorterUnitClass.getName()
+                    + " doesn't have no args constructor");
+        }
+
+        //TODO дописать проверку методов String getDescription() и String getVersion()
+    }
+
+    private void checkProviderUnitClass(Class providerUnitClass) throws NoSuchMethodException,
+            SorterUnitClassValidationFailedException {
+        Method getDataMethod = providerUnitClass.getMethod("getData", int.class);
+
+        if (getDataMethod.getParameterCount() != 1) {
+            throw new SorterUnitClassValidationFailedException("Provider class " + providerUnitClass.getName()
+                    + " getData method parameters count doesn't equals 1");
+        }
+        if (getDataMethod.getParameterTypes()[0] != int.class) {
+            throw new SorterUnitClassValidationFailedException("Provider class " + providerUnitClass.getName()
+                    + " getData method argument type doesn't int");
+        }
+        if (!getDataMethod.getReturnType().isArray() ||
+                getDataMethod.getReturnType().getComponentType() != unitClass) {
+            throw new SorterUnitClassValidationFailedException("Provider class " + providerUnitClass.getName()
+                    + " getData method return type doesn't " + unitClass.getName() + "[]");
+        }
+
+        try {
+            providerUnitClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new SorterUnitClassValidationFailedException("Sorter class " + providerUnitClass.getName()
+                    + " doesn't have no args constructor");
+        }
+    }
+
+    public Object getSorterUnit() {
         return sorterUnit;
     }
 
-    public SorterUnit<K> getBenchmarkUnit() {
+    public Object getBenchmarkUnit() {
         return benchmarkUnit;
     }
 
-    public List<TestItem<K>> getTestItemsList() { return testItemsList; }
+    public List<TestItem> getTestItemsList() { return testItemsList; }
 
     public boolean isComplete() { return completeFlag; }
 }

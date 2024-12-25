@@ -5,14 +5,14 @@ import org.example.sorterUnit.SorterUnit;
 
 import java.util.Arrays;
 
-public class TestItem<K> {
-    private final DataProvider<K> dataProvider;
+public class TestItem {
+    private final Object dataProvider;
     private final int dataLength;
     private final int iterationsCount;
     private long[] benchmarkResultsArray;
     private long[] sorterUnitResultsArray;
 
-    public TestItem(DataProvider<K> dataProvider, int dataLength, int iterationsCount) {
+    public TestItem(Object dataProvider, int dataLength, int iterationsCount) {
         this.dataProvider = dataProvider;
         this.dataLength = dataLength;
         this.iterationsCount = iterationsCount;
@@ -36,7 +36,7 @@ public class TestItem<K> {
         sorterUnitResultsArray[index] = result;
     }
 
-    public DataProvider<K> getDataProvider() {
+    public Object getDataProvider() {
         return dataProvider;
     }
 

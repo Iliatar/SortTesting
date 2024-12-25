@@ -50,10 +50,9 @@ public class App implements Runnable {
     }
 
     private void runTests() throws Exception {
-        SorterUnit<Integer> benchmarkSorter = new BenchmarkIntegerSorter();
         File configurationFile = new File(configurationFilePath);
 
-        var testUnit = ConfigurationParser.getTestUnit(benchmarkSorter, configurationFile);
+        var testUnit = ConfigurationParser.getTestUnit(configurationFile);
 
         testUnit.runTest();
 
