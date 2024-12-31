@@ -1,0 +1,12 @@
+{
+  "unitClassName": "java.lang.Integer",
+  "className": "org.example.IntegerQuickSorter",
+  "filePath": "/home/iliatar/java-practice/IntegerQuickSorter/lib/build/classes/java/main/org/example/IntegerQuickSorter.class",
+  "testItems": [
+    {
+      "dataProvider": "org.example.dataProvider.SimpleIntegerDataProvider",
+      "dataLength": 5000,
+      "iterations": 1000
+    }
+  ]
+}
